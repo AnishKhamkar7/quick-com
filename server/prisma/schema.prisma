@@ -5,10 +5,148 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserRole {
+  CUSTOMER
+  DELIVERY_PARTNER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING  
+  ACCEPTED 
+  PICKED_UP
+  ON_THE_WAY
+  DELIVERED 
+  CANCELLED 
+}
+
+enum DeliveryPartnerStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   
+  name      String
+  phone     String?
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer        Customer?
+  deliveryPartner DeliveryPartner?
+
+  @@index([email])
+  @@index([role])
+}
+
+model Customer {
+  id      String @id @default(cuid())
+  userId  String @unique
+  address String?
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([userId])
+}
+
+model DeliveryPartner {
+  id           String                @id @default(cuid())
+  userId       String                @unique
+  vehicleType  String?               
+  status       DeliveryPartnerStatus @default(OFFLINE)
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  category    String?
+  inStock     Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([category])
+  @@index([inStock])
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique 
+  customerId        String
+  deliveryPartnerId String?
+  status            OrderStatus @default(PENDING)
+  
+  deliveryAddress   String
+  
+  totalAmount       Float
+  deliveryFee       Float       @default(0)
+  notes             String?
+  
+  createdAt         DateTime    @default(now())
+  acceptedAt        DateTime?   
+  pickedUpAt        DateTime?   
+  onTheWayAt        DateTime?  
+  deliveredAt       DateTime?  
+  cancelledAt       DateTime?  
+  updatedAt         DateTime    @updatedAt
+
+  customer        Customer         @relation(fields: [customerId], references: [id])
+  deliveryPartner DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+  orderItems      OrderItem[]
+  statusHistory   OrderStatusHistory[]
+
+  @@index([customerId])
+  @@index([deliveryPartnerId])
+  @@index([status])
+  @@index([orderNumber])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float  
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  notes     String?
+  createdAt DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([createdAt])
 }
