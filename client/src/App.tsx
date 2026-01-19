@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
 import DashboardLayout from "@/layout/DashboardLayout";
-import { CustomerDashboard } from "@/pages/dashboard/CustomerDashboard";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import DeliveryPartnerDashboard from "@/pages/dashboard/DeliveryDashboard";
 import Login from "./pages/auth/Login";
@@ -14,6 +13,7 @@ import Register from "./pages/auth/Register";
 import AuthLayout from "./layout/AuthLayout";
 import { ThemeProvider } from "./components/ThemeProvider";
 import NotFound from "./components/NotFound";
+import HomePage from "./pages/customer/HomePage";
 
 function App() {
   return (
@@ -28,7 +28,7 @@ function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-              <Route path="/customer/home" element={<CustomerDashboard />} />
+              <Route path="/customer/home" element={<HomePage />} />
 
               <Route
                 path="/delivery/dashboard"
