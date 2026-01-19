@@ -81,7 +81,7 @@ model Product {
   description String?
   price       Float
   imageUrl    String?
-  category    String?
+  category    ProductCategory
   inStock     Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -90,6 +90,18 @@ model Product {
 
   @@index([category])
   @@index([inStock])
+}
+
+enum ProductCategory {
+  GROCERIES
+  FRUITS_VEGETABLES
+  DAIRY
+  BEVERAGES
+  SNACKS
+  BAKERY
+  MEAT_SEAFOOD
+  HOUSEHOLD
+  PERSONAL_CARE
 }
 
 model Order {
