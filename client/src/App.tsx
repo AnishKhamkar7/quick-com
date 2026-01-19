@@ -12,8 +12,8 @@ import DeliveryPartnerDashboard from "@/pages/dashboard/DeliveryDashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import AuthLayout from "./layout/AuthLayout";
-import { ThemeProvider } from "./components/theme-provider";
-import NotFound from "./components/not-found";
+import { ThemeProvider } from "./components/ThemeProvider";
+import NotFound from "./components/NotFound";
 
 function App() {
   return (
