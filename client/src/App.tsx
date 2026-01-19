@@ -12,33 +12,39 @@ import DeliveryPartnerDashboard from "@/pages/dashboard/DeliveryDashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import AuthLayout from "./layout/AuthLayout";
+import { ThemeProvider } from "./components/theme-provider";
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Route>
-          <Route element={<DashboardLayout />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
+            <Route element={<DashboardLayout />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-            <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+              <Route
+                path="/customer/dashboard"
+                element={<CustomerDashboard />}
+              />
+
+              <Route
+                path="/delivery/dashboard"
+                element={<DeliveryPartnerDashboard />}
+              />
+            </Route>
 
             <Route
-              path="/delivery/dashboard"
-              element={<DeliveryPartnerDashboard />}
+              path="/"
+              element={<Navigate to="/customer/dashboard" replace />}
             />
-          </Route>
-
-          <Route
-            path="/"
-            element={<Navigate to="/customer/dashboard" replace />}
-          />
-        </Routes>
-      </AuthProvider>
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

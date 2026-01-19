@@ -4,6 +4,8 @@ import { useAuth } from "@/context/auth-context";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { getRoleBasedLinks, getRoleTitle } from "@/config/navigation";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();

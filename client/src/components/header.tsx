@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./sidebar";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "./theme-provider";
 
 interface HeaderProps {
   roleTitle: string;
@@ -30,6 +32,8 @@ interface HeaderProps {
 }
 
 export function Header({ roleTitle, user, onLogout, links }: HeaderProps) {
+  const { theme, toggleTheme } = useTheme();
+
   const getUserInitials = () => {
     return (
       user?.name
@@ -60,14 +64,25 @@ export function Header({ roleTitle, user, onLogout, links }: HeaderProps) {
       </Sheet>
 
       <div className="flex-1"></div>
+      <button
+        onClick={toggleTheme}
+        className="mr-2 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted hover:bg-muted/80 transition"
+        aria-label="Toggle theme"
+      >
+        {theme === "dark" ? (
+          <Sun className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <Moon className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
 
       <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild>
           {/* Removed: variant="secondary" and "icon" size which caused the boxy look */}
           <button className="relative flex h-9 w-9 items-center justify-center rounded-full ring-offset-background transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+            <Avatar className="h-9 w-9 bg-muted border border-border shadow-sm">
+              <AvatarImage src={user?.avatar || undefined} />
+              <AvatarFallback className="bg-muted text-muted-foreground text-xs font-semibold">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>
