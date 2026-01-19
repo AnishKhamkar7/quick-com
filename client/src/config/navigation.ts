@@ -6,6 +6,9 @@ import {
   Truck,
   MapPin,
   User,
+  Box,
+  BoxIcon,
+  BoxesIcon,
 } from "lucide-react";
 
 export const getRoleBasedLinks = (role: string | undefined) => {
@@ -40,8 +43,8 @@ export const getRoleBasedLinks = (role: string | undefined) => {
     case "CUSTOMER":
       return [
         { to: "/customer/home", label: "Home", icon: LayoutDashboard },
-        { to: "/customer/products", label: "Products", icon: Package },
-        { to: "/customer/orders", label: "My Orders", icon: ShoppingCart },
+        { to: "/customer/orders", label: "My Orders", icon: BoxesIcon },
+        { to: "/customer/cart", label: "Cart", icon: ShoppingCart },
         { to: "/customer/profile", label: "Profile", icon: User },
       ];
     default:

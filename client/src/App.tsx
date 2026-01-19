@@ -14,6 +14,9 @@ import AuthLayout from "./layout/AuthLayout";
 import { ThemeProvider } from "./components/ThemeProvider";
 import NotFound from "./components/NotFound";
 import HomePage from "./pages/customer/HomePage";
+import MyOrders from "./pages/customer/MyOrders";
+import CartPage from "./pages/customer/Cart";
+import CustomerProfile from "./pages/customer/Profile";
 
 function App() {
   return (
@@ -29,7 +32,9 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
               <Route path="/customer/home" element={<HomePage />} />
-
+              <Route path="/customer/orders" element={<MyOrders />} />
+              <Route path="/customer/cart" element={<CartPage />} />
+              <Route path="/customer/profile" element={<CustomerProfile />} />
               <Route
                 path="/delivery/dashboard"
                 element={<DeliveryPartnerDashboard />}

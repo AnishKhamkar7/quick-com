@@ -15,7 +15,7 @@ export function Sidebar({ links, userRole }: SidebarProps) {
   const location = useLocation();
 
   return (
-    <div className="flex h-full flex-col border-r bg-card/50">
+    <div className="flex h-full flex-col border-r bg-card/50 overflow-hidden">
       <div className="flex h-16 items-center border-b px-6">
         <Link
           to="/"
@@ -30,7 +30,7 @@ export function Sidebar({ links, userRole }: SidebarProps) {
         </Link>
       </div>
 
-      <div className="flex-1 overflow-auto py-4">
+      <div className="flex-1 overflow-hidden py-4">
         <nav className="grid gap-1 px-3">
           {links.map((link) => {
             const Icon = link.icon;

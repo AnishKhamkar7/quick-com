@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { Search, MapPin } from "lucide-react";
-import { PromoBanner } from "@/components/PromoBanner";
 import { Input } from "@/components/ui/input";
 import { CategoryCard } from "@/components/CategoryCard";
+import { Link } from "react-router-dom";
 
 const Homepage = () => {
   const [products, setProducts] = useState([]);
@@ -180,9 +179,9 @@ const Homepage = () => {
   const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b sticky top-0 bg-background z-50">
+    <>
+      {/* Search Bar Section */}
+      <div className=" bg-background sticky top-0 z-10">
         <div className="container mx-auto p-4">
           <div className="flex items-center gap-4">
             {/* Search Bar */}
@@ -198,32 +197,30 @@ const Homepage = () => {
                 />
               </div>
             </div>
-
             {/* Location */}
             <Button variant="outline" size="icon">
               <MapPin className="w-4 h-4" />
             </Button>
-
             {/* User */}
             <Button variant="outline" size="icon">
               <User className="w-4 h-4" />
             </Button>
-
-            {/* Cart */}
-            <Button variant="outline" size="icon" className="relative">
-              <ShoppingCart className="w-4 h-4" />
-              {totalItems > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
-                  {totalItems}
-                </Badge>
-              )}
-            </Button>
+            <Link to="/customer/cart">
+              <Button variant="outline" size="icon" className="relative">
+                <ShoppingCart className="w-4 h-4" />
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
-      <main className="container mx-auto p-4 space-y-8">
+      <div className="container mx-auto p-4 lg:p-6 space-y-8">
         {/* Categories Section */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Categories</h2>
@@ -251,8 +248,8 @@ const Homepage = () => {
             ))}
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

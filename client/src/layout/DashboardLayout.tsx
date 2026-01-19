@@ -17,15 +17,13 @@ export default function DashboardLayout() {
   const links = getRoleBasedLinks(user?.role);
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-muted/40 md:block">
+    <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <aside className="hidden md:block border-r bg-muted/40">
         <Sidebar links={links} userRole={user?.role || ""} />
-      </div>
-
-      <div className="flex flex-col">
+      </aside>
+      <div className="flex flex-col h-screen overflow-hidden">
         <Header user={user} onLogout={handleLogout} links={links} />
-
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
