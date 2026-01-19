@@ -8,11 +8,10 @@ interface SidebarProps {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
   }>;
-  roleTitle: string;
   userRole: string;
 }
 
-export function Sidebar({ links, roleTitle, userRole }: SidebarProps) {
+export function Sidebar({ links, userRole }: SidebarProps) {
   const location = useLocation();
 
   return (
@@ -26,7 +25,7 @@ export function Sidebar({ links, roleTitle, userRole }: SidebarProps) {
             <Package className="h-5 w-5" />
           </div>
           <span className="font-bold tracking-tight text-foreground">
-            {roleTitle}
+            Quicom
           </span>
         </Link>
       </div>

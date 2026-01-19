@@ -13,10 +13,9 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./sidebar";
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "./theme-provider";
+import { useTheme } from "@/hooks/use-theme";
 
 interface HeaderProps {
-  roleTitle: string;
   user: {
     name?: string;
     email?: string;
@@ -31,7 +30,7 @@ interface HeaderProps {
   }>;
 }
 
-export function Header({ roleTitle, user, onLogout, links }: HeaderProps) {
+export function Header({ user, onLogout, links }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
 
   const getUserInitials = () => {
@@ -55,11 +54,7 @@ export function Header({ roleTitle, user, onLogout, links }: HeaderProps) {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">
-          <Sidebar
-            links={links}
-            roleTitle={roleTitle}
-            userRole={user?.role || ""}
-          />
+          <Sidebar links={links} userRole={user?.role || ""} />
         </SheetContent>
       </Sheet>
 

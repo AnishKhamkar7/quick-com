@@ -1,11 +1,11 @@
-import { 
-  LayoutDashboard, 
-  Users, 
-  ShoppingCart, 
-  Package, 
-  Truck, 
-  MapPin, 
-  User
+import {
+  LayoutDashboard,
+  Users,
+  ShoppingCart,
+  Package,
+  Truck,
+  MapPin,
+  User,
 } from "lucide-react";
 
 export const getRoleBasedLinks = (role: string | undefined) => {
@@ -16,12 +16,24 @@ export const getRoleBasedLinks = (role: string | undefined) => {
         { to: "/admin/users", label: "Users", icon: Users },
         { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
         { to: "/admin/products", label: "Products", icon: Package },
-        { to: "/admin/delivery-partners", label: "Delivery Partners", icon: Truck },
+        {
+          to: "/admin/delivery-partners",
+          label: "Delivery Partners",
+          icon: Truck,
+        },
       ];
     case "DELIVERY_PARTNER":
       return [
-        { to: "/delivery/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { to: "/delivery/orders", label: "Available Orders", icon: ShoppingCart },
+        {
+          to: "/delivery/dashboard",
+          label: "Dashboard",
+          icon: LayoutDashboard,
+        },
+        {
+          to: "/delivery/orders",
+          label: "Available Orders",
+          icon: ShoppingCart,
+        },
         { to: "/delivery/my-deliveries", label: "My Deliveries", icon: MapPin },
         { to: "/delivery/profile", label: "Profile", icon: User },
       ];
@@ -44,7 +56,7 @@ export const getRoleTitle = (role: string | undefined) => {
     case "DELIVERY_PARTNER":
       return "Delivery Portal";
     case "CUSTOMER":
-      return "Customer Portal";
+      return "al";
     default:
       return "Dashboard";
   }
