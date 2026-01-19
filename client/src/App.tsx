@@ -13,6 +13,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import AuthLayout from "./layout/AuthLayout";
 import { ThemeProvider } from "./components/theme-provider";
+import NotFound from "./components/not-found";
 
 function App() {
   return (
@@ -27,10 +28,7 @@ function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-              <Route
-                path="/customer/dashboard"
-                element={<CustomerDashboard />}
-              />
+              <Route path="/customer/home" element={<CustomerDashboard />} />
 
               <Route
                 path="/delivery/dashboard"
@@ -42,6 +40,7 @@ function App() {
               path="/"
               element={<Navigate to="/customer/dashboard" replace />}
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>
