@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, User, Search, MapPin } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
-import { Input } from "@/components/ui/input";
 import { CategoryCard } from "@/components/CategoryCard";
-import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import api from "@/lib/axios";
@@ -72,7 +67,6 @@ const ProductSkeleton = () => (
 );
 
 const Homepage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<Record<string, number>>({});
 
   const {
@@ -101,45 +95,8 @@ const Homepage = () => {
     console.log("Category clicked:", categoryId);
   };
 
-  const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
   return (
     <>
-      <div className="bg-background sticky top-0 z-10 border-b">
-        <div className="container mx-auto p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1 max-w-2xl">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Button variant="outline" size="icon">
-              <MapPin className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <User className="w-4 h-4" />
-            </Button>
-            <Link to="/customer/cart">
-              <Button variant="outline" size="icon" className="relative">
-                <ShoppingCart className="w-4 h-4" />
-                {totalItems > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0">
-                    {totalItems}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto p-4 lg:p-6 space-y-8">
         <section>
           <h2 className="text-2xl font-bold mb-4">Categories</h2>

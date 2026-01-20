@@ -1,6 +1,18 @@
 import { Link } from "react-router-dom";
-import { Menu, LogOut, User } from "lucide-react";
+import {
+  Menu,
+  LogOut,
+  User,
+  Search,
+  ShoppingCart,
+  MapPin,
+  Moon,
+  Sun,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,7 +24,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 
 interface HeaderProps {
@@ -32,83 +43,106 @@ interface HeaderProps {
 
 export function Header({ user, onLogout, links }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const isCustomer = user?.role === "CUSTOMER";
 
-  const getUserInitials = () => {
-    return (
-      user?.name
-        ?.split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2) || "U"
-    );
-  };
+  const getUserInitials = () =>
+    user?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
 
   return (
-    // Changed: bg-white/80 and backdrop-blur for a subtle "sticky" feel
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0">
-          <Sidebar links={links} userRole={user?.role || ""} />
-        </SheetContent>
-      </Sheet>
-
-      <div className="flex-1"></div>
-      <button
-        onClick={toggleTheme}
-        className="mr-2 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted hover:bg-muted/80 transition"
-        aria-label="Toggle theme"
-      >
-        {theme === "dark" ? (
-          <Sun className="h-4 w-4 text-muted-foreground" />
-        ) : (
-          <Moon className="h-4 w-4 text-muted-foreground" />
+    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+      <div className="flex h-16 items-center gap-4">
+        {/* Mobile Sidebar */}
+        {!isCustomer && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0">
+              <Sidebar links={links} userRole={user?.role || ""} />
+            </SheetContent>
+          </Sheet>
         )}
-      </button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          {/* Removed: variant="secondary" and "icon" size which caused the boxy look */}
-          <button className="relative flex h-9 w-9 items-center justify-center rounded-full ring-offset-background transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <Avatar className="h-9 w-9 bg-muted border border-border shadow-sm">
-              <AvatarImage src={user?.avatar || undefined} />
-              <AvatarFallback className="bg-muted text-muted-foreground text-xs font-semibold">
-                {getUserInitials()}
-              </AvatarFallback>
-            </Avatar>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 mt-2">
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
+        {/* Customer Search */}
+        {isCustomer && (
+          <div className="flex-1 max-w-2xl relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search for products..." className="pl-10" />
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Customer Extras */}
+        {isCustomer && (
+          <>
+            <Button variant="outline" size="icon">
+              <MapPin className="h-4 w-4" />
+            </Button>
+
+            <Link to="/customer/cart">
+              <Button variant="outline" size="icon" className="relative">
+                <ShoppingCart className="h-4 w-4" />
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
+                  2
+                </Badge>
+              </Button>
+            </Link>
+          </>
+        )}
+
+        {/* Theme Toggle (COMMON) */}
+        <button
+          onClick={toggleTheme}
+          className="flex h-9 w-9 items-center justify-center rounded-full border bg-muted hover:bg-muted/80"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </button>
+
+        {/* Profile Dropdown (COMMON) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex h-9 w-9 items-center justify-center rounded-full">
+              <Avatar className="h-9 w-9 border">
+                <AvatarImage src={user?.avatar} />
+                <AvatarFallback>{getUserInitials()}</AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
               <p className="text-sm font-medium">{user?.name}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link
-              to={`/${user?.role?.toLowerCase().replace("_", "-")}/profile`}
-            >
-              <User className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span>Profile</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={onLogout}
-            className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Logout</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem asChild>
+              <Link to={`/${user?.role?.toLowerCase()}/profile`}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onLogout} className="text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }

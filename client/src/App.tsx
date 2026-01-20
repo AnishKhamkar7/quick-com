@@ -19,6 +19,7 @@ import CartPage from "./pages/customer/Cart";
 import CustomerProfile from "./pages/customer/Profile";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/query-client";
+import { CartProvider } from "./context/CartProvider";
 
 function App() {
   return (
@@ -33,11 +34,15 @@ function App() {
               </Route>
               <Route element={<DashboardLayout />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-                <Route path="/customer/home" element={<HomePage />} />
-                <Route path="/customer/orders" element={<MyOrders />} />
-                <Route path="/customer/cart" element={<CartPage />} />
-                <Route path="/customer/profile" element={<CustomerProfile />} />
+                <CartProvider>
+                  <Route path="/customer/home" element={<HomePage />} />
+                  <Route path="/customer/orders" element={<MyOrders />} />
+                  <Route path="/customer/cart" element={<CartPage />} />
+                  <Route
+                    path="/customer/profile"
+                    element={<CustomerProfile />}
+                  />
+                </CartProvider>
                 <Route
                   path="/delivery/dashboard"
                   element={<DeliveryPartnerDashboard />}
