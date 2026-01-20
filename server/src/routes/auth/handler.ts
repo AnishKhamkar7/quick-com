@@ -11,7 +11,7 @@ export class AuthHandler {
 
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, password, name, phone, role, address, vehicleType } =
+      const { email, password, name, phone, role, address, vehicleType, city } =
         req.body;
 
       if (!email || !password || !name || !role) {
@@ -41,6 +41,7 @@ export class AuthHandler {
         name,
         phone,
         role,
+        city,
         address,
         vehicleType,
       });

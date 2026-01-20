@@ -2,6 +2,7 @@ import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../../db";
+import { City } from "@prisma/client";
 
 interface Register {
   email: string;
@@ -11,6 +12,7 @@ interface Register {
   role: UserRole;
   address?: string;
   vehicleType?: string;
+  city: City;
 }
 
 interface Login {
@@ -56,11 +58,13 @@ export class AuthService {
           password: hashedPassword,
           name: data.name,
           phone: data.phone,
+
           role: data.role,
           ...(data.role === UserRole.CUSTOMER && {
             customer: {
               create: {
                 address: data.address,
+                city: data.city,
               },
             },
           }),
@@ -68,6 +72,7 @@ export class AuthService {
             deliveryPartner: {
               create: {
                 vehicleType: data.vehicleType,
+                city: data.city,
               },
             },
           }),
