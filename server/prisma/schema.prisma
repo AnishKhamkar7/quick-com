@@ -91,6 +91,7 @@ model Product {
   name        String
   description String?
   price       Float
+  quantity    Int
   imageUrl    String?
   category    ProductCategory
   inStock     Boolean @default(true)
