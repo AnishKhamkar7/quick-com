@@ -1,17 +1,19 @@
 import { Card, CardContent } from "./ui/card";
 
-export const CategoryCard = ({ category, onClick }) => {
+export const CategoryCard = ({ category, Icon, onClick }) => {
   return (
-    <Card className="cursor-pointer" onClick={onClick}>
-      <CardContent className="p-4">
-        <div className="aspect-square mb-2">
-          <img
-            src={category.image || "/api/placeholder/100/100"}
-            alt={category.name}
-            className="w-full h-full object-contain"
-          />
+    <Card
+      onClick={onClick}
+      className="cursor-pointer hover:shadow-md transition"
+    >
+      <CardContent className="h-36 flex flex-col items-center justify-center gap-4 p-4">
+        <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center">
+          <Icon className="h-7 w-7 text-foreground" />
         </div>
-        <p className="text-sm text-center font-medium">{category.name}</p>
+
+        <p className="text-sm font-medium text-center leading-tight">
+          {category.name}
+        </p>
       </CardContent>
     </Card>
   );
