@@ -20,6 +20,7 @@ import CustomerProfile from "./pages/customer/Profile";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/query-client";
 import { CartProvider } from "./context/CartProvider";
+import ProductsPage from "./pages/customer/ProductsPage";
 
 function App() {
   return (
@@ -38,6 +39,10 @@ function App() {
                   <Route path="/customer/home" element={<HomePage />} />
                   <Route path="/customer/orders" element={<MyOrders />} />
                   <Route path="/customer/cart" element={<CartPage />} />
+                  <Route
+                    path="/customer/category/:category"
+                    element={<ProductsPage />}
+                  />
                   <Route
                     path="/customer/profile"
                     element={<CustomerProfile />}

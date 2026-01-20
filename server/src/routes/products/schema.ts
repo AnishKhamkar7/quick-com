@@ -34,38 +34,3 @@ export const getProductsByCategorySchema = z.object({
       .default(10),
   }),
 });
-
-export const getAllProductsSchema = z.object({
-  query: z.object({
-    category: z.enum(PRODUCT_CATEGORIES).optional(),
-    inStock: z
-      .enum(["true", "false"])
-      .transform((v) => v === "true")
-      .optional(),
-  }),
-});
-
-export const createProductSchema = z.object({
-  body: z.object({
-    name: z.string().min(2),
-    description: z.string().optional(),
-    price: z.number().positive(),
-    imageUrl: z.string().optional(),
-    category: z.enum(PRODUCT_CATEGORIES),
-    inStock: z.boolean().optional(),
-  }),
-});
-
-export const updateProductSchema = z.object({
-  params: z.object({
-    id: z.string().cuid(),
-  }),
-  body: z.object({
-    name: z.string().min(2).optional(),
-    description: z.string().optional(),
-    price: z.number().positive().optional(),
-    imageUrl: z.string().optional(),
-    category: z.enum(PRODUCT_CATEGORIES).optional(),
-    inStock: z.boolean().optional(),
-  }),
-});

@@ -1,8 +1,7 @@
-// layouts/DashboardLayout.tsx
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 import { Sidebar } from "@/components/Sidebar";
-import { Header } from "@/components/header";
+import { Header } from "@/components/Header";
 import { getRoleBasedLinks } from "@/config/navigation";
 
 export default function DashboardLayout() {

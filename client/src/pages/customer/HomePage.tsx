@@ -1,33 +1,13 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import api from "@/lib/axios";
-import {
-  ShoppingBasket,
-  Apple,
-  Milk,
-  Coffee,
-  Cookie,
-  Croissant,
-  Drumstick,
-  Home,
-} from "lucide-react";
 import type { Product } from "@/types/global";
 import { useCart } from "@/context/cart-context";
-
-const CATEGORY_ICON_MAP: Record<string, any> = {
-  GROCERIES: ShoppingBasket,
-  FRUITS_VEGETABLES: Apple,
-  DAIRY: Milk,
-  BEVERAGES: Coffee,
-  SNACKS: Cookie,
-  BAKERY: Croissant,
-  MEAT_SEAFOOD: Drumstick,
-  HOUSEHOLD: Home,
-};
+import { useNavigate } from "react-router-dom";
+import { CATEGORY_ICON_MAP } from "@/utils/category-icon";
 
 const PRODUCT_CATEGORIES = [
   { id: "GROCERIES", name: "Groceries", image: "/api/placeholder/100/100" },
@@ -69,8 +49,14 @@ const ProductSkeleton = () => (
 );
 
 const Homepage = () => {
-  const { dispatch, state } = useCart();
-  console.log("Cart State in HomePage:", state);
+  const { dispatch } = useCart();
+
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (categoryId: string) => {
+    navigate(`/customer/category/${categoryId}`);
+  };
+
   const {
     data: products,
     isLoading: productsLoading,
@@ -87,13 +73,8 @@ const Homepage = () => {
     if (quantity === 0) {
       dispatch({ type: "REMOVE", productId: product.id });
     } else {
-      dispatch({ type: "SET_QTY", productId: product.id, quantity });
-      dispatch({ type: "ADD", product });
+      dispatch({ type: "SET_QTY", product, quantity });
     }
-  };
-
-  const handleCategoryClick = (categoryId: string) => {
-    console.log("Category clicked:", categoryId);
   };
 
   return (
@@ -137,6 +118,7 @@ const Homepage = () => {
                   key={product.id}
                   product={product}
                   onQuantityChange={handleQuantityChange}
+                  Icon={CATEGORY_ICON_MAP[product.category]}
                 />
               ))}
             </div>

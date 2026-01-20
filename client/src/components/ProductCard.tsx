@@ -9,24 +9,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { Product } from "@/types/global";
 
 export const ProductCard = ({
   product,
   onQuantityChange,
+  Icon,
 }: {
   product: Product;
   onQuantityChange?: (productId: Product, quantity: number) => void;
+  Icon: any;
 }) => {
   const [quantity, setQuantity] = useState(0);
+  console.log("QUntity for product", product.id, "is", quantity);
 
   const handleIncrement = () => {
     const newQty = quantity + 1;
     setQuantity(newQty);
     onQuantityChange?.(product, newQty);
   };
-  
+
   const handleDecrement = () => {
     if (quantity > 0) {
       const newQty = quantity - 1;
@@ -39,11 +41,7 @@ export const ProductCard = ({
     <Card>
       <CardHeader>
         <div className="aspect-square relative">
-          <img
-            src={product.imageUrl || "/api/placeholder/200/200"}
-            alt={product.name}
-            className="w-full h-full object-contain"
-          />
+          <Icon className="h-7 w-7 text-foreground" />
         </div>
       </CardHeader>
       <CardContent>
@@ -55,22 +53,7 @@ export const ProductCard = ({
         )}
         <div className="flex items-center gap-2 mt-2">
           <span className="font-bold">₹{product.price}</span>
-          {product.originalPrice && (
-            <span className="text-sm line-through text-muted-foreground">
-              ₹{product.originalPrice}
-            </span>
-          )}
         </div>
-        {product.originalPrice && (
-          <Badge variant="secondary" className="mt-2">
-            {Math.round(
-              ((product.originalPrice - product.price) /
-                product.originalPrice) *
-                100,
-            )}
-            % OFF
-          </Badge>
-        )}
       </CardContent>
       <CardFooter>
         {quantity === 0 ? (

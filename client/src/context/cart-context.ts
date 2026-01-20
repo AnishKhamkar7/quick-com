@@ -20,7 +20,7 @@ type CartContextType = {
 type CartAction =
   | { type: "ADD"; product: Product }
   | { type: "REMOVE"; productId: string }
-  | { type: "SET_QTY"; productId: string; quantity: number }
+  | { type: "SET_QTY"; product: Product; quantity: number }
   | { type: "CLEAR" };
 
 export const CartContext = createContext<CartContextType | null>(null);
@@ -46,21 +46,27 @@ export const cartReducer = (
     }
 
     case "SET_QTY": {
-      if (action.quantity <= 0) {
+      const { product, quantity } = action;
+
+      if (quantity <= 0) {
         const updated = { ...state.items };
-        delete updated[action.productId];
+        delete updated[product.id];
         return { items: updated };
       }
+
       return {
         items: {
           ...state.items,
-          [action.productId]: {
-            ...state.items[action.productId],
-            quantity: action.quantity,
+          [product.id]: {
+            productId: product.id,
+            product,
+            price: product.price,
+            quantity,
           },
         },
       };
     }
+
     case "REMOVE": {
       const updated = { ...state.items };
       delete updated[action.productId];

@@ -37,9 +37,8 @@ const CartPage = () => {
 
   return (
     <div className="container mx-auto p-4 lg:p-6 space-y-6">
-      {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">My Cart</h1>
+        <h2 className="text-2xl font-bold tracking-tight">My Cart</h2>
         <p className="text-muted-foreground">
           Review your items and proceed to payment
         </p>
@@ -57,7 +56,6 @@ const CartPage = () => {
         </Card>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-          {/* Cart Items */}
           <Card>
             <CardHeader>
               <CardTitle>Cart Items</CardTitle>
