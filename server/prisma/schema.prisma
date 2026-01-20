@@ -28,6 +28,15 @@ enum OrderStatus {
   CANCELLED 
 }
 
+enum City {
+  MUMBAI
+  DELHI
+  BENGALURU
+  HYDERABAD
+  CHENNAI
+  PUNE
+}
+
 enum DeliveryPartnerStatus {
   AVAILABLE
   BUSY
@@ -55,6 +64,7 @@ model Customer {
   id      String @id @default(cuid())
   userId  String @unique
   address String?
+  city    City
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
@@ -67,6 +77,7 @@ model DeliveryPartner {
   userId       String                @unique
   vehicleType  String?               
   status       DeliveryPartnerStatus @default(OFFLINE)
+  city          City
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
@@ -110,6 +121,7 @@ model Order {
   customerId        String
   deliveryPartnerId String?
   status            OrderStatus @default(PENDING)
+  city              City 
   
   deliveryAddress   String
   
