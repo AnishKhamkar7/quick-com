@@ -17,39 +17,43 @@ import HomePage from "./pages/customer/HomePage";
 import MyOrders from "./pages/customer/MyOrders";
 import CartPage from "./pages/customer/Cart";
 import CustomerProfile from "./pages/customer/Profile";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/query-client";
 
 function App() {
   return (
-    <Router>
-      <ThemeProvider>
-        <AuthProvider>
-          <Routes>
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Route>
-            <Route element={<DashboardLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ThemeProvider>
+          <AuthProvider>
+            <Routes>
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Route>
+              <Route element={<DashboardLayout />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-              <Route path="/customer/home" element={<HomePage />} />
-              <Route path="/customer/orders" element={<MyOrders />} />
-              <Route path="/customer/cart" element={<CartPage />} />
-              <Route path="/customer/profile" element={<CustomerProfile />} />
+                <Route path="/customer/home" element={<HomePage />} />
+                <Route path="/customer/orders" element={<MyOrders />} />
+                <Route path="/customer/cart" element={<CartPage />} />
+                <Route path="/customer/profile" element={<CustomerProfile />} />
+                <Route
+                  path="/delivery/dashboard"
+                  element={<DeliveryPartnerDashboard />}
+                />
+              </Route>
+
               <Route
-                path="/delivery/dashboard"
-                element={<DeliveryPartnerDashboard />}
+                path="/"
+                element={<Navigate to="/customer/dashboard" replace />}
               />
-            </Route>
-
-            <Route
-              path="/"
-              element={<Navigate to="/customer/dashboard" replace />}
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </ThemeProvider>
-    </Router>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </ThemeProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
