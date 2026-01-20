@@ -29,7 +29,6 @@ interface RegisterData {
   vehicleType?: string;
 }
 
-// API functions
 const authApi = {
   getProfile: async (): Promise<User> => {
     const { data } = await api.get("/auth/profile");
@@ -41,30 +40,23 @@ const authApi = {
     password: string;
   }): Promise<User> => {
     const { data } = await api.post("/auth/login", credentials);
-    if (data.data.accessToken) {
-      localStorage.setItem("accessToken", data.data.accessToken);
-    }
+
     return data.data.user;
   },
 
   register: async (registerData: RegisterData): Promise<User> => {
     const { data } = await api.post("/auth/register", registerData);
-    if (data.data.accessToken) {
-      localStorage.setItem("accessToken", data.data.accessToken);
-    }
     return data.data.user;
   },
 
   logout: async (): Promise<void> => {
     await api.post("/auth/logout");
-    localStorage.removeItem("accessToken");
   },
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Query for checking auth status
   const {
     data: user = null,
     isLoading,
@@ -73,12 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["auth", "profile"],
     queryFn: authApi.getProfile,
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
-    enabled: !!localStorage.getItem("accessToken"), // Only run if token exists
   });
 
-  // Login mutation
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
@@ -86,7 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Register mutation
   const registerMutation = useMutation({
     mutationFn: authApi.register,
     onSuccess: (data) => {
@@ -94,7 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,
     onSuccess: () => {
