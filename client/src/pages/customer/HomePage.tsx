@@ -15,6 +15,8 @@ import {
   Drumstick,
   Home,
 } from "lucide-react";
+import type { Product } from "@/types/global";
+import { useCart } from "@/context/cart-context";
 
 const CATEGORY_ICON_MAP: Record<string, any> = {
   GROCERIES: ShoppingBasket,
@@ -67,8 +69,8 @@ const ProductSkeleton = () => (
 );
 
 const Homepage = () => {
-  const [cart, setCart] = useState<Record<string, number>>({});
-
+  const { dispatch, state } = useCart();
+  console.log("Cart State in HomePage:", state);
   const {
     data: products,
     isLoading: productsLoading,
@@ -80,15 +82,14 @@ const Homepage = () => {
   });
 
   console.log("Products data:", products);
-  const handleQuantityChange = (productId: string, quantity: number) => {
-    setCart((prev) => {
-      if (quantity === 0) {
-        const newCart = { ...prev };
-        delete newCart[productId];
-        return newCart;
-      }
-      return { ...prev, [productId]: quantity };
-    });
+
+  const handleQuantityChange = (product: Product, quantity: number) => {
+    if (quantity === 0) {
+      dispatch({ type: "REMOVE", productId: product.id });
+    } else {
+      dispatch({ type: "SET_QTY", productId: product.id, quantity });
+      dispatch({ type: "ADD", product });
+    }
   };
 
   const handleCategoryClick = (categoryId: string) => {
@@ -131,7 +132,7 @@ const Homepage = () => {
             </div>
           ) : products?.data && products.data.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {products.data.map((product: any) => (
+              {products.data.map((product: Product) => (
                 <ProductCard
                   key={product.id}
                   product={product}

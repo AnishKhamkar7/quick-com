@@ -10,21 +10,28 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import type { Product } from "@/types/global";
 
-export const ProductCard = ({ product, onQuantityChange }) => {
+export const ProductCard = ({
+  product,
+  onQuantityChange,
+}: {
+  product: Product;
+  onQuantityChange?: (productId: Product, quantity: number) => void;
+}) => {
   const [quantity, setQuantity] = useState(0);
 
   const handleIncrement = () => {
     const newQty = quantity + 1;
     setQuantity(newQty);
-    onQuantityChange?.(product.id, newQty);
+    onQuantityChange?.(product, newQty);
   };
-
+  
   const handleDecrement = () => {
     if (quantity > 0) {
       const newQty = quantity - 1;
       setQuantity(newQty);
-      onQuantityChange?.(product.id, newQty);
+      onQuantityChange?.(product, newQty);
     }
   };
 

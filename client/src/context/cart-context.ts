@@ -1,22 +1,29 @@
+import type { Product } from "@/types/global";
 import { createContext, useContext } from "react";
 type CartItem = {
   productId: string;
   quantity: number;
   price: number;
-  product: any;
+  product: Product;
 };
 
 type CartState = {
   items: Record<string, CartItem>;
 };
 
+type CartContextType = {
+  state: CartState;
+  dispatch: React.Dispatch<CartAction>;
+  totalItems: number;
+};
+
 type CartAction =
-  | { type: "ADD"; product: any }
+  | { type: "ADD"; product: Product }
   | { type: "REMOVE"; productId: string }
   | { type: "SET_QTY"; productId: string; quantity: number }
   | { type: "CLEAR" };
 
-export const CartContext = createContext<any>(null);
+export const CartContext = createContext<CartContextType | null>(null);
 
 export const cartReducer = (
   state: CartState,
@@ -54,6 +61,11 @@ export const cartReducer = (
         },
       };
     }
+    case "REMOVE": {
+      const updated = { ...state.items };
+      delete updated[action.productId];
+      return { items: updated };
+    }
 
     case "CLEAR":
       return { items: {} };
@@ -62,5 +74,10 @@ export const cartReducer = (
       return state;
   }
 };
-
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const ctx = useContext(CartContext);
+  if (!ctx) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return ctx;
+};

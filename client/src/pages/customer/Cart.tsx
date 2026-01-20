@@ -1,53 +1,30 @@
-import { useState } from "react";
 import { Package, Trash2, Plus, Minus, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
-interface CartItem {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  price: number;
-  quantity: number;
-  category: string;
-}
+import { useCart } from "@/context/cart-context";
 
 const CartPage = () => {
-  const [items, setItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "Chicken Biryani",
-      price: 240,
-      quantity: 2,
-      category: "Food",
-    },
-    {
-      id: "2",
-      name: "Paneer Butter Masala",
-      price: 180,
-      quantity: 1,
-      category: "Food",
-    },
-  ]);
+  const { state, dispatch } = useCart();
+  const items = Object.values(state.items);
+  console.log("Cart Items:", items);
 
-  const deliveryFee = 40;
+  const updateQty = (productId: string, delta: number) => {
+    const item = state.items[productId];
+    if (!item) return;
 
-  const updateQty = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
+    const newQty = item.quantity + delta;
+
+    if (newQty <= 0) {
+      dispatch({ type: "REMOVE", productId });
+    } else {
+      dispatch({ type: "SET_QTY", productId, quantity: newQty });
+    }
   };
 
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = (productId: string) => {
+    dispatch({ type: "REMOVE", productId });
   };
 
   const subtotal = items.reduce(
@@ -55,6 +32,7 @@ const CartPage = () => {
     0,
   );
 
+  const deliveryFee = 40;
   const total = subtotal + deliveryFee;
 
   return (
@@ -88,7 +66,7 @@ const CartPage = () => {
             <CardContent className="space-y-4">
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.product.id}
                   className="flex items-center gap-4 p-3 rounded-lg bg-muted/40"
                 >
                   <div className="w-14 h-14 bg-muted rounded-md flex items-center justify-center">
@@ -96,11 +74,11 @@ const CartPage = () => {
                   </div>
 
                   <div className="flex-1">
-                    <p className="font-medium">{item.name}</p>
+                    <p className="font-medium">{item.product.name}</p>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{item.category}</Badge>
+                      <Badge variant="outline">{item.product.category}</Badge>
                       <span className="text-sm text-muted-foreground">
-                        ₹{item.price}
+                        ₹{item.product.price}
                       </span>
                     </div>
                   </div>
@@ -109,7 +87,7 @@ const CartPage = () => {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => updateQty(item.id, -1)}
+                      onClick={() => updateQty(item.product.id, -1)}
                     >
                       <Minus className="w-4 h-4" />
                     </Button>
@@ -119,7 +97,7 @@ const CartPage = () => {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => updateQty(item.id, 1)}
+                      onClick={() => updateQty(item.product.id, 1)}
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -132,7 +110,7 @@ const CartPage = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.product.id)}
                     >
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>

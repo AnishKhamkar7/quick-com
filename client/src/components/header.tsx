@@ -5,7 +5,6 @@ import {
   User,
   Search,
   ShoppingCart,
-  MapPin,
   Moon,
   Sun,
 } from "lucide-react";
@@ -25,6 +24,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
 import { useTheme } from "@/hooks/use-theme";
+import { useCart } from "@/context/cart-context";
 
 interface HeaderProps {
   user: {
@@ -44,7 +44,7 @@ interface HeaderProps {
 export function Header({ user, onLogout, links }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const isCustomer = user?.role === "CUSTOMER";
-
+  const { totalItems } = useCart();
   const getUserInitials = () =>
     user?.name
       ?.split(" ")
@@ -56,7 +56,6 @@ export function Header({ user, onLogout, links }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       <div className="flex h-16 items-center gap-4">
-        {/* Mobile Sidebar */}
         {!isCustomer && (
           <Sheet>
             <SheetTrigger asChild>
@@ -70,7 +69,6 @@ export function Header({ user, onLogout, links }: HeaderProps) {
           </Sheet>
         )}
 
-        {/* Customer Search */}
         {isCustomer && (
           <div className="flex-1 max-w-2xl relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -80,25 +78,21 @@ export function Header({ user, onLogout, links }: HeaderProps) {
 
         <div className="flex-1" />
 
-        {/* Customer Extras */}
         {isCustomer && (
           <>
-            <Button variant="outline" size="icon">
-              <MapPin className="h-4 w-4" />
-            </Button>
-
             <Link to="/customer/cart">
               <Button variant="outline" size="icon" className="relative">
                 <ShoppingCart className="h-4 w-4" />
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
-                  2
-                </Badge>
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center">
+                    {totalItems}
+                  </Badge>
+                )}
               </Button>
             </Link>
           </>
         )}
 
-        {/* Theme Toggle (COMMON) */}
         <button
           onClick={toggleTheme}
           className="flex h-9 w-9 items-center justify-center rounded-full border bg-muted hover:bg-muted/80"
@@ -110,7 +104,6 @@ export function Header({ user, onLogout, links }: HeaderProps) {
           )}
         </button>
 
-        {/* Profile Dropdown (COMMON) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex h-9 w-9 items-center justify-center rounded-full">

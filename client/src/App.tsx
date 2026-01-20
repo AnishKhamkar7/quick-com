@@ -27,14 +27,14 @@ function App() {
       <Router>
         <ThemeProvider>
           <AuthProvider>
-            <Routes>
-              <Route element={<AuthLayout />}>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-              </Route>
-              <Route element={<DashboardLayout />}>
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <CartProvider>
+            <CartProvider>
+              <Routes>
+                <Route element={<AuthLayout />}>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                </Route>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
                   <Route path="/customer/home" element={<HomePage />} />
                   <Route path="/customer/orders" element={<MyOrders />} />
                   <Route path="/customer/cart" element={<CartPage />} />
@@ -42,19 +42,19 @@ function App() {
                     path="/customer/profile"
                     element={<CustomerProfile />}
                   />
-                </CartProvider>
-                <Route
-                  path="/delivery/dashboard"
-                  element={<DeliveryPartnerDashboard />}
-                />
-              </Route>
+                  <Route
+                    path="/delivery/dashboard"
+                    element={<DeliveryPartnerDashboard />}
+                  />
+                </Route>
 
-              <Route
-                path="/"
-                element={<Navigate to="/customer/dashboard" replace />}
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                <Route
+                  path="/"
+                  element={<Navigate to="/customer/dashboard" replace />}
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </CartProvider>
           </AuthProvider>
         </ThemeProvider>
       </Router>
