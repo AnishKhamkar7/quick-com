@@ -1,13 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import { z } from "zod";
 import api from "@/lib/axios";
 
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginResponse {
   data: {
@@ -21,8 +37,7 @@ interface LoginResponse {
   };
 }
 
-// API function
-const loginUser = async (credentials: LoginCredentials) => {
+const loginUser = async (credentials: LoginFormData) => {
   const { data } = await api.post<LoginResponse>("/auth/login", credentials);
   if (data.data.accessToken) {
     localStorage.setItem("accessToken", data.data.accessToken);
@@ -31,112 +46,155 @@ const loginUser = async (credentials: LoginCredentials) => {
 };
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+  });
+  const [validationErrors, setValidationErrors] = useState<
+    Partial<Record<keyof LoginFormData, string>>
+  >({});
+  const [error, setError] = useState("");
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const redirectBasedOnRole = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        navigate("/admin/dashboard", { replace: true });
-        break;
-      case "DELIVERY_PARTNER":
-        navigate("/delivery/dashboard", { replace: true });
-        break;
-      case "CUSTOMER":
-        navigate("/customer/dashboard", { replace: true });
-        break;
-      default:
-        navigate("/", { replace: true });
-    }
-  };
-  // Login mutation using TanStack Query
+  const redirectBasedOnRole = useCallback(
+    (role: string) => {
+      switch (role) {
+        case "ADMIN":
+          navigate("/admin/dashboard", { replace: true });
+          break;
+        case "DELIVERY_PARTNER":
+          navigate("/delivery/dashboard", { replace: true });
+          break;
+        case "CUSTOMER":
+          navigate("/customer/home", { replace: true });
+          break;
+        default:
+          navigate("/", { replace: true });
+      }
+    },
+    [navigate],
+  );
+
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (userData) => {
-      // Redirect based on role after successful login
       redirectBasedOnRole(userData.role);
+    },
+    onError: (err) => {
+      console.log("Login error:", err);
+      setError(
+        err!.response?.data?.message ||
+          err.message ||
+          "Login failed. Please try again.",
+      );
     },
   });
 
-  // Redirect if already logged in - use user.id to prevent infinite loop
   useEffect(() => {
     if (user?.id) {
       redirectBasedOnRole(user.role);
     }
-  }, [user?.id]); // Only depend on user.id, not the entire user object
+  }, [user?.id, user?.role, redirectBasedOnRole]);
+
+  const handleChange = (field: keyof LoginFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate({ email, password });
+    setError("");
+    setValidationErrors({});
+
+    const result = loginSchema.safeParse(formData);
+
+    if (!result.success) {
+      const errors: Partial<Record<keyof LoginFormData, string>> = {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0]) {
+          errors[issue.path[0] as keyof LoginFormData] = issue.message;
+        }
+      });
+      setValidationErrors(errors);
+      return;
+    }
+
+    loginMutation.mutate(formData);
   };
 
   return (
-    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-      <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="text-2xl">Welcome Back</CardTitle>
+        <CardDescription>Login to access your account</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-      {loginMutation.isError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {loginMutation.error instanceof Error
-            ? loginMutation.error.message
-            : "Login failed. Please try again."}
-        </div>
-      )}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your@email.com"
+              value={formData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+              disabled={loginMutation.isPending}
+              className={validationErrors.email ? "border-red-500" : ""}
+            />
+            {validationErrors.email && (
+              <p className="text-sm text-red-500">{validationErrors.email}</p>
+            )}
+          </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={(e) => handleChange("password", e.target.value)}
+              disabled={loginMutation.isPending}
+              className={validationErrors.password ? "border-red-500" : ""}
+            />
+            {validationErrors.password && (
+              <p className="text-sm text-red-500">
+                {validationErrors.password}
+              </p>
+            )}
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex flex-col space-y-4 mt-4">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loginMutation.isPending}
           >
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+            {loginMutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            {loginMutation.isPending ? "Logging in..." : "Login"}
+          </Button>
 
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loginMutation.isPending}
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loginMutation.isPending ? "Logging in..." : "Login"}
-        </button>
+          <p className="text-sm text-center text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-primary hover:underline">
+              Register
+            </Link>
+          </p>
+        </CardFooter>
       </form>
-
-      <p className="mt-4 text-center text-sm text-gray-600">
-        Don't have an account?{" "}
-        <Link
-          to="/register"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Register
-        </Link>
-      </p>
-    </div>
+    </Card>
   );
 }

@@ -29,6 +29,13 @@ export default function Register() {
     name: "",
     phone: "",
     role: "CUSTOMER" as "CUSTOMER" | "DELIVERY_PARTNER" | "ADMIN",
+    city: "MUMBAI" as
+      | "MUMBAI"
+      | "DELHI"
+      | "BENGALURU"
+      | "HYDERABAD"
+      | "CHENNAI"
+      | "PUNE",
     address: "",
     vehicleType: "",
   });
@@ -47,11 +54,22 @@ export default function Register() {
       return;
     }
 
+    if (!formData.city) {
+      setError("Please select a city");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await register(formData);
-      navigate("/dashboard");
+      if (formData.role === "ADMIN") {
+        return navigate("/admin/dashboard");
+      } else if (formData.role === "DELIVERY_PARTNER") {
+        return navigate("/delivery/dashboard");
+      }
+
+      return navigate("customer/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -152,6 +170,27 @@ export default function Register() {
             </Select>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="city">City *</Label>
+            <Select
+              value={formData.city}
+              onValueChange={(value) => handleChange("city", value)}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select city" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MUMBAI">Mumbai</SelectItem>
+                <SelectItem value="DELHI">Delhi</SelectItem>
+                <SelectItem value="BENGALURU">Bengaluru</SelectItem>
+                <SelectItem value="HYDERABAD">Hyderabad</SelectItem>
+                <SelectItem value="CHENNAI">Chennai</SelectItem>
+                <SelectItem value="PUNE">Pune</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {formData.role === "CUSTOMER" && (
             <div className="space-y-2">
               <Label htmlFor="address">Address (Optional)</Label>
@@ -181,7 +220,7 @@ export default function Register() {
           )}
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 mt-4">
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isLoading ? "Creating account..." : "Create Account"}

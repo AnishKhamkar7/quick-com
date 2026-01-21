@@ -12,27 +12,27 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  server:
-    build: ./server
-    container_name: server
-    restart: unless-stopped
-    ports:
-      - "5000:5000"
-    env_file:
-      - ./server/.env
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/delivery_db
-    depends_on:
-      - postgres
+  # server:
+  #   build: ./server
+  #   container_name: server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5000:5000"
+  #   env_file:
+  #     - ./server/.env
+  #   environment:
+  #     DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/delivery_db
+  #   depends_on:
+  #     - postgres
 
-  client:
-    build: ./client
-    container_name: client
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-    depends_on:
-      - server
+  # client:
+  #   build: ./client
+  #   container_name: client
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - server
 
 volumes:
   postgres_data:

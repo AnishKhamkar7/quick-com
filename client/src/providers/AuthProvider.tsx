@@ -26,6 +26,7 @@ interface RegisterData {
   phone?: string;
   role: "CUSTOMER" | "DELIVERY_PARTNER" | "ADMIN";
   address?: string;
+  city: "MUMBAI" | "DELHI" | "BENGALURU" | "HYDERABAD" | "CHENNAI" | "PUNE";
   vehicleType?: string;
 }
 

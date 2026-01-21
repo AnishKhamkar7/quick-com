@@ -61,7 +61,7 @@ function App() {
 
                   <Route
                     path="/"
-                    element={<Navigate to="/customer/dashboard" replace />}
+                    element={<Navigate to="/customer/home" replace />}
                   />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
