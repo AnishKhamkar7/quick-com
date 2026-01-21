@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { AuthService } from "./service";
-import { AuthHandler, AuthMiddleware } from "./handler";
+import { AuthHandler } from "./handler";
+import { authenticate, authorize } from "../../middleware/auth";
 
 const authService = new AuthService();
 
 const authHandler = new AuthHandler(authService);
-const authMiddleware = new AuthMiddleware(authService);
 
 const router = Router();
 
@@ -13,11 +13,11 @@ router.post("/register", authHandler.register);
 
 router.post("/login", authHandler.login);
 
-router.get("/profile", authMiddleware.authenticate, authHandler.getProfile);
+router.get("/profile", authenticate, authHandler.getProfile);
 
 router.post("/logout", authHandler.logout);
 
 router.post("/refresh", authHandler.refreshToken);
 
-export { router as authRouter, authMiddleware };
+export { router as authRouter };
 export default router;

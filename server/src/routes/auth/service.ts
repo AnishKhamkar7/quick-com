@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { verifyToken, generateToken } from "../../lib/token";
 import prisma from "../../db";
 import { City } from "@prisma/client";
 
@@ -18,12 +18,6 @@ interface Register {
 interface Login {
   email: string;
   password: string;
-}
-
-interface JWTPayload {
-  userId: string;
-  email: string;
-  role: UserRole;
 }
 
 interface AuthResponse {
@@ -85,7 +79,7 @@ export class AuthService {
         },
       });
 
-      const token = this.generateToken({
+      const token = generateToken({
         userId: user.id,
         email: user.email,
         role: user.role,
@@ -122,7 +116,7 @@ export class AuthService {
       throw new Error("Invalid credentials");
     }
 
-    const token = this.generateToken({
+    const token = generateToken({
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -134,15 +128,6 @@ export class AuthService {
       user: userWithoutPassword,
       token,
     };
-  }
-
-  async verifyToken(token: string): Promise<JWTPayload> {
-    try {
-      const decoded = jwt.verify(token, this.jwtSecret) as JWTPayload;
-      return decoded;
-    } catch (error) {
-      throw new Error("Invalid or expired token");
-    }
   }
 
   async getUserById(userId: string) {
@@ -178,20 +163,14 @@ export class AuthService {
   }
 
   async refreshToken(oldToken: string): Promise<{ token: string }> {
-    const payload = await this.verifyToken(oldToken);
+    const payload = await verifyToken(oldToken);
 
-    const newToken = this.generateToken({
+    const newToken = generateToken({
       userId: payload.userId,
       email: payload.email,
       role: payload.role,
     });
 
     return { token: newToken };
-  }
-
-  private generateToken(payload: JWTPayload): string {
-    return jwt.sign(payload, this.jwtSecret, {
-      expiresIn: "7d",
-    });
   }
 }
