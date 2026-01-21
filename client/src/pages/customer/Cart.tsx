@@ -19,7 +19,7 @@ const CartPage = () => {
     if (newQty <= 0) {
       dispatch({ type: "REMOVE", productId });
     } else {
-      dispatch({ type: "SET_QTY", productId, quantity: newQty });
+      dispatch({ type: "SET_QTY", product: item.product, quantity: newQty });
     }
   };
 
