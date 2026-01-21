@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AuthContext } from "./auth-context";
+import { AuthContext } from "../context/auth-context";
 import api from "@/lib/axios";
 
 interface User {
