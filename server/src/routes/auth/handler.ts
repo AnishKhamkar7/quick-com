@@ -46,7 +46,6 @@ export class AuthHandler {
         vehicleType,
       });
 
-      // Set httpOnly cookie
       res.cookie("token", result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -137,43 +136,6 @@ export class AuthHandler {
     } catch (error) {
       if (error instanceof Error) {
         res.status(404).json({
-          success: false,
-          message: error.message,
-        });
-      } else {
-        next(error);
-      }
-    }
-  };
-
-  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const token = req.cookies.token;
-
-      if (!token) {
-        return res.status(401).json({
-          success: false,
-          message: "No token provided",
-        });
-      }
-
-      const result = await this.authService.refreshToken(token);
-
-      // Set new httpOnly cookie
-      res.cookie("token", result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Token refreshed successfully",
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(401).json({
           success: false,
           message: error.message,
         });

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthService } from "./service";
 import { AuthHandler } from "./handler";
-import { authenticate, authorize } from "../../middleware/auth";
+import { authenticate } from "../../middleware/auth";
 
 const authService = new AuthService();
 
@@ -17,7 +17,4 @@ router.get("/profile", authenticate, authHandler.getProfile);
 
 router.post("/logout", authHandler.logout);
 
-router.post("/refresh", authHandler.refreshToken);
-
-export { router as authRouter };
 export default router;

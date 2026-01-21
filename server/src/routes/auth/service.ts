@@ -161,16 +161,4 @@ export class AuthService {
 
     return user;
   }
-
-  async refreshToken(oldToken: string): Promise<{ token: string }> {
-    const payload = await verifyToken(oldToken);
-
-    const newToken = generateToken({
-      userId: payload.userId,
-      email: payload.email,
-      role: payload.role,
-    });
-
-    return { token: newToken };
-  }
 }
