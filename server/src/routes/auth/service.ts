@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { verifyToken, generateToken } from "../../lib/token";
+import { generateToken } from "../../lib/token";
 import prisma from "../../db";
 import { City } from "@prisma/client";
 
@@ -76,13 +76,23 @@ export class AuthService {
           email: true,
           name: true,
           role: true,
+          customer: {
+            select: {
+              city: true,
+            },
+          },
+          deliveryPartner: {
+            select: {
+              city: true,
+            },
+          },
         },
       });
 
       const token = generateToken({
         userId: user.id,
-        email: user.email,
         role: user.role,
+        city: user.customer?.city || user.deliveryPartner?.city,
       });
 
       return {
@@ -103,11 +113,24 @@ export class AuthService {
         name: true,
         role: true,
         password: true,
+        customer: {
+          select: {
+            city: true,
+          },
+        },
+        deliveryPartner: {
+          select: {
+            city: true,
+          },
+        },
       },
     });
 
     if (!user) {
       throw new Error("Invalid credentials");
+    }
+
+    if (user.role === "CUSTOMER") {
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
@@ -118,8 +141,8 @@ export class AuthService {
 
     const token = generateToken({
       userId: user.id,
-      email: user.email,
       role: user.role,
+      city: user.customer?.city || user.deliveryPartner?.city,
     });
 
     const { password, ...userWithoutPassword } = user;

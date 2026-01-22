@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { UserRole } from "@prisma/client";
+import { City, UserRole } from "@prisma/client";
 
 interface JWTPayload {
   userId: string;
-  email: string;
   role: UserRole;
+  city?: City;
 }
 
 export const verifyToken = (token: string) => {

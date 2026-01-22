@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { City, UserRole } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../lib/token";
 
@@ -20,7 +20,7 @@ export const authenticate = async (
 
     console.log("Authenticating with token:", token);
 
-    const payload = await verifyToken(token);
+    const payload = verifyToken(token);
 
     req.user = payload;
     next();
@@ -57,8 +57,8 @@ declare global {
     interface Request {
       user?: {
         userId: string;
-        email: string;
         role: UserRole;
+        city?: City;
       };
     }
   }

@@ -30,8 +30,8 @@ function App() {
         <Toaster />
         <ThemeProvider>
           <AuthProvider>
-            <CartProvider>
-              <WebSocketProvider>
+            <WebSocketProvider>
+              <CartProvider>
                 <Routes>
                   <Route element={<AuthLayout />}>
                     <Route path="/login" element={<Login />} />
@@ -65,8 +65,8 @@ function App() {
                   />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </WebSocketProvider>
-            </CartProvider>
+              </CartProvider>
+            </WebSocketProvider>
           </AuthProvider>
         </ThemeProvider>
       </Router>

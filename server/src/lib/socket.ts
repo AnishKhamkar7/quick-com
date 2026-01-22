@@ -8,6 +8,7 @@ import {
   wsJoinCityRoomSchema,
   wsJoinOrderRoomSchema,
 } from "../routes/orders/schema";
+import { verifyToken } from "./token";
 
 interface SocketData {
   userId: string;
@@ -18,8 +19,7 @@ interface SocketData {
 export default class WebSocketService {
   private io: SocketIOServer;
 
-  // Track connected users
-  private connectedUsers: Map<string, Socket> = new Map();
+  private connectedUsers: Map<string, Set<Socket>> = new Map();
 
   constructor(server: HTTPServer) {
     this.io = new SocketIOServer(server, {
@@ -35,17 +35,18 @@ export default class WebSocketService {
     this.setupConnectionHandler();
   }
 
-  // ============================================================================
-  // MIDDLEWARE SETUP
-  // ============================================================================
-
   private setupMiddleware() {
     // Authentication middleware
     this.io.use(async (socket: Socket, next) => {
       try {
         // Extract token from handshake auth or query
         const token =
-          socket.handshake.auth.token || socket.handshake.query.token;
+          socket.handshake.auth.token ||
+          socket.handshake.query.token ||
+          socket.handshake.headers.cookie
+            ?.split("; ")
+            .find((c) => c.startsWith("token="))
+            ?.split("=")[1];
 
         if (!token) {
           return next(new Error("Authentication token required"));
@@ -86,7 +87,11 @@ export default class WebSocketService {
       );
 
       // Store socket reference
-      this.connectedUsers.set(socketData.userId, socket);
+      const sockets =
+        this.connectedUsers.get(socketData.userId) ?? new Set<Socket>();
+
+      sockets.add(socket);
+      this.connectedUsers.set(socketData.userId, sockets);
 
       // Setup event handlers
       this.setupCityRoomHandlers(socket);
@@ -95,7 +100,14 @@ export default class WebSocketService {
       // Handle disconnection
       socket.on("disconnect", () => {
         console.log(`User disconnected: ${socketData.userId}`);
-        this.connectedUsers.delete(socketData.userId);
+        const sockets = this.connectedUsers.get(socketData.userId);
+
+        if (sockets) {
+          sockets.delete(socket);
+          if (sockets.size === 0) {
+            this.connectedUsers.delete(socketData.userId);
+          }
+        }
       });
     });
   }
@@ -206,9 +218,6 @@ export default class WebSocketService {
   // PUBLIC METHODS TO EMIT EVENTS
   // ============================================================================
 
-  /**
-   * Emit new order to all delivery partners in the city
-   */
   emitNewOrderToCity(city: City, orderPayload: WebSocketOrderPayload) {
     const roomName = this.getCityRoomName(city);
 
@@ -219,9 +228,6 @@ export default class WebSocketService {
     );
   }
 
-  /**
-   * Emit order accepted to customer and remove from city room
-   */
   emitOrderAccepted(
     orderId: string,
     orderPayload: WebSocketStatusUpdatePayload,
@@ -233,9 +239,6 @@ export default class WebSocketService {
     console.log(`Order ${orderId} accepted event emitted`);
   }
 
-  /**
-   * Emit order status update to order room (customer and delivery partner)
-   */
   emitOrderStatusUpdate(
     orderId: string,
     status: OrderStatus,
@@ -266,9 +269,6 @@ export default class WebSocketService {
     console.log(`Order ${orderId} status updated to ${status}`);
   }
 
-  /**
-   * Emit order cancelled by customer to city room
-   */
   emitOrderCancelledByCustomer(city: City, orderId: string) {
     const cityRoomName = this.getCityRoomName(city);
 
@@ -280,18 +280,19 @@ export default class WebSocketService {
     console.log(`Order ${orderId} cancelled by customer in city: ${city}`);
   }
 
-  /**
-   * Send direct message to a specific user
-   */
   sendToUser(userId: string, event: string, data: any) {
-    const socket = this.connectedUsers.get(userId);
+    const sockets = this.connectedUsers.get(userId);
 
-    if (socket) {
-      socket.emit(event, data);
-      console.log(`Event ${event} sent to user ${userId}`);
-    } else {
+    if (!sockets) {
       console.log(`User ${userId} not connected`);
+      return;
     }
+
+    for (const socket of sockets) {
+      socket.emit(event, data);
+    }
+
+    console.log(`Event ${event} sent to user ${userId}`);
   }
 
   // ============================================================================
@@ -311,20 +312,13 @@ export default class WebSocketService {
     userRole: string;
     city?: City;
   } | null> {
-    // Implement your JWT verification logic here
-    // This is a placeholder implementation
     try {
-      // Example using jsonwebtoken:
-      // const jwt = require('jsonwebtoken');
-      // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // For now, returning mock data
-      // Replace this with actual JWT verification
+      const data = verifyToken(token);
 
       return {
-        userId: "mock-user-id",
-        userRole: "DELIVERY_PARTNER",
-        city: City.MUMBAI,
+        userId: data.userId,
+        userRole: data.role,
+        city: data.city,
       };
     } catch (error) {
       console.error("Token verification error:", error);
@@ -332,9 +326,6 @@ export default class WebSocketService {
     }
   }
 
-  /**
-   * Get Socket.IO instance for external use
-   */
   getIO(): SocketIOServer {
     return this.io;
   }
