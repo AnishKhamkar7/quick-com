@@ -44,4 +44,64 @@ export class UsersService {
       where: { userId },
     });
   }
+
+  async updateUserProfile(userId: string, updateData: any) {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+
+        customer: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
+
+        deliveryPartner: {
+          select: {
+            id: true,
+            vehicleType: true,
+            status: true,
+          },
+        },
+      },
+    });
+    return updatedUser;
+  }
+
+  updateCustomerProfile = async (
+    userId: string,
+    updateData: { address?: string },
+  ) => {
+    const customer = await this.getCustomerByUserId(userId);
+    if (!customer) {
+      throw new Error("Customer profile not found");
+    }
+    const updatedCustomer = await prisma.customer.update({
+      where: { id: customer.id },
+      data: updateData,
+    });
+    return updatedCustomer;
+  };
+
+  updateDeliveryPartnerProfile = async (
+    userId: string,
+    updateData: { vehicleType?: string },
+  ) => {
+    const deliveryPartner = await this.getDeliveryPartnerByUserId(userId);
+    if (!deliveryPartner) {
+      throw new Error("Delivery partner profile not found");
+    }
+    const updatedDeliveryPartner = await prisma.deliveryPartner.update({
+      where: { id: deliveryPartner.id },
+      data: updateData,
+    });
+    return updatedDeliveryPartner;
+  };
 }

@@ -9,15 +9,15 @@ interface User {
   name: string;
   role: "CUSTOMER" | "DELIVERY_PARTNER" | "ADMIN";
   customer: {
-        id: string;
-        address: string | null;
-    } | null;
-    deliveryPartner: {
-        status: string;
-        id: string;
-        vehicleType: string | null;
-    } | null;
-    phone: string | null;
+    id: string;
+    address: string | null;
+  } | null;
+  deliveryPartner: {
+    status: string;
+    id: string;
+    vehicleType: string | null;
+  } | null;
+  phone: string | null;
 }
 
 export interface AuthContextType {

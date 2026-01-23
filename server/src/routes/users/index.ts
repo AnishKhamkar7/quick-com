@@ -10,4 +10,6 @@ const usersHandler = new UsersHandler(userService);
 
 router.get("/profile", authenticate, usersHandler.getProfile);
 
+router.put("/profile", authenticate, usersHandler.updateProfile);
+
 export default router;
