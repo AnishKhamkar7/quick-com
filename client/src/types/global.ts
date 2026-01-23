@@ -98,10 +98,6 @@ export interface WebSocketStatusUpdatePayload {
   };
 }
 
-// ============================================================================
-// WEBSOCKET CONTEXT TYPE
-// ============================================================================
-
 export interface WebSocketContextType {
   isConnected: boolean;
   joinOrderRoom: (orderId: string) => void;

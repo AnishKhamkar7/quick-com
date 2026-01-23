@@ -10,26 +10,23 @@ import { useNavigate } from "react-router-dom";
 import { CATEGORY_ICON_MAP } from "@/utils/category-icon";
 
 const PRODUCT_CATEGORIES = [
-  { id: "GROCERIES", name: "Groceries", image: "/api/placeholder/100/100" },
+  { id: "GROCERIES", name: "Groceries" },
   {
     id: "FRUITS_VEGETABLES",
     name: "Fruits & Vegetables",
-    image: "/api/placeholder/100/100",
   },
   {
     id: "DAIRY",
     name: "Dairy, Bread & Eggs",
-    image: "/api/placeholder/100/100",
   },
-  { id: "BEVERAGES", name: "Beverages", image: "/api/placeholder/100/100" },
-  { id: "SNACKS", name: "Snacks", image: "/api/placeholder/100/100" },
-  { id: "BAKERY", name: "Bakery", image: "/api/placeholder/100/100" },
+  { id: "BEVERAGES", name: "Beverages" },
+  { id: "SNACKS", name: "Snacks" },
+  { id: "BAKERY", name: "Bakery" },
   {
     id: "MEAT_SEAFOOD",
     name: "Meat & Seafood",
-    image: "/api/placeholder/100/100",
   },
-  { id: "HOUSEHOLD", name: "Household", image: "/api/placeholder/100/100" },
+  { id: "HOUSEHOLD", name: "Household" },
 ];
 
 const fetchProducts = async (category: string) => {
@@ -62,7 +59,7 @@ const Homepage = () => {
     isLoading: productsLoading,
     error: productsError,
   } = useQuery({
-    queryKey: ["products", "GROCERIES"],
+      queryKey: ["products", "GROCERIES"],
     queryFn: () => fetchProducts("GROCERIES"),
     staleTime: 5 * 60 * 1000,
   });

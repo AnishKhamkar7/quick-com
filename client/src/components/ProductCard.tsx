@@ -21,7 +21,6 @@ export const ProductCard = ({
   Icon: any;
 }) => {
   const [quantity, setQuantity] = useState(0);
-  console.log("QUntity for product", product.id, "is", quantity);
 
   const handleIncrement = () => {
     const newQty = quantity + 1;

@@ -19,3 +19,4 @@ export const CATEGORY_ICON_MAP: Record<string, any> = {
   MEAT_SEAFOOD: Drumstick,
   HOUSEHOLD: Home,
 };
+

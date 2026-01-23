@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/cart-context";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import api from "@/lib/axios";
 
 const CartPage = () => {
   const { state, dispatch } = useCart();
   const items = Object.values(state.items);
-  console.log("Cart Items:", items);
+  const navigate = useNavigate();
 
   const updateQty = (productId: string, delta: number) => {
     const item = state.items[productId];
@@ -34,6 +38,44 @@ const CartPage = () => {
 
   const deliveryFee = 40;
   const total = subtotal + deliveryFee;
+
+  const createOrderMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const res = await api.post("/orders", payload);
+      return res.data;
+    },
+  });
+
+  const handlePayNow = () => {
+    if (items.length === 0) return;
+
+    const payload = {
+      deliveryAddress: "Customer default address", // later fetch from profile
+      notes: "Leave at the door",
+      items: items.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+    };
+
+    createOrderMutation.mutate(payload, {
+      onSuccess: (res) => {
+        console.log("Order created:", res);
+        toast.success("Order placed successfully 🎉");
+
+        dispatch({ type: "CLEAR" });
+
+        // const orderId = res.data.id;
+
+        navigate(`/customer/orders`);
+      },
+      onError: (error) => {
+        toast.error("Failed to place order", {
+          description: error.response?.data?.message || "Something went wrong",
+        });
+      },
+    });
+  };
 
   return (
     <div className="container mx-auto p-4 lg:p-6 space-y-6">
@@ -142,9 +184,14 @@ const CartPage = () => {
                 <span>₹{total.toFixed(2)}</span>
               </div>
 
-              <Button size="lg" className="w-full gap-2">
+              <Button
+                size="lg"
+                className="w-full gap-2"
+                onClick={handlePayNow}
+                disabled={createOrderMutation.isPending}
+              >
                 <CreditCard className="w-5 h-5" />
-                Pay Now
+                {createOrderMutation.isPending ? "Placing Order..." : "Pay Now"}
               </Button>
             </CardContent>
           </Card>

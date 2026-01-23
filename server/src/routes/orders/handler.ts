@@ -22,14 +22,7 @@ export default class OrderHandlerIntegrated {
     try {
       const { body } = createOrderSchema.parse({ body: req.body });
 
-      const userId = req.user!.userId; 
-      const userRole = req.user!.role;
-
-      if (userRole !== "CUSTOMER") {
-        return res
-          .status(403)
-          .json({ message: "Only customers can create orders" });
-      }
+      const userId = req.user!.userId;
 
       const customer = await this.userService.getCustomerByUserId(userId);
       if (!customer) {
@@ -59,14 +52,7 @@ export default class OrderHandlerIntegrated {
     try {
       const { params } = acceptOrderSchema.parse({ params: req.params });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-
-      if (userRole !== "DELIVERY_PARTNER") {
-        return res
-          .status(403)
-          .json({ message: "Only delivery partners can accept orders" });
-      }
+      const userId = req.user!.userId;
 
       const deliveryPartner =
         await this.userService.getDeliveryPartnerByUserId(userId);
@@ -105,14 +91,7 @@ export default class OrderHandlerIntegrated {
         body: req.body,
       });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-
-      if (userRole !== "DELIVERY_PARTNER") {
-        return res.status(403).json({
-          message: "Only delivery partners can update order status",
-        });
-      }
+      const userId = req.user!.userId;
 
       const deliveryPartner =
         await this.userService.getDeliveryPartnerByUserId(userId);
@@ -149,8 +128,8 @@ export default class OrderHandlerIntegrated {
     try {
       const { params } = getOrderByIdSchema.parse({ params: req.params });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user!.userId;
+      const userRole = req.user!.role;
 
       if (userRole !== "CUSTOMER") {
         return res
@@ -189,8 +168,8 @@ export default class OrderHandlerIntegrated {
     try {
       const { params } = getOrderByIdSchema.parse({ params: req.params });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user!.userId;
+      const userRole = req.user!.role;
 
       const order = await this.orderWsService.getOrderById(
         params.orderId,
@@ -220,24 +199,15 @@ export default class OrderHandlerIntegrated {
     }
   };
 
-  // ============================================================================
-  // GET CUSTOMER ORDERS
-  // ============================================================================
-
   getCustomerOrders = async (req: Request, res: Response) => {
     try {
-      const { query } = getCustomerOrdersSchema.parse({ query: req.query });
+      const { query } = getCustomerOrdersSchema.parse({
+        query: req.query,
+      });
 
       const userId = req.user!.userId;
-      const userRole = req.user!.role;
-
-      if (userRole !== "CUSTOMER") {
-        return res
-          .status(403)
-          .json({ message: "Only customers can view their orders" });
-      }
-
       const customer = await this.userService.getCustomerByUserId(userId);
+
       if (!customer) {
         return res.status(404).json({ message: "Customer profile not found" });
       }
@@ -263,24 +233,13 @@ export default class OrderHandlerIntegrated {
     }
   };
 
-  // ============================================================================
-  // GET DELIVERY PARTNER ORDERS
-  // ============================================================================
-
   getDeliveryPartnerOrders = async (req: Request, res: Response) => {
     try {
       const { query } = getDeliveryPartnerOrdersSchema.parse({
         query: req.query,
       });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-
-      if (userRole !== "DELIVERY_PARTNER") {
-        return res.status(403).json({
-          message: "Only delivery partners can view their orders",
-        });
-      }
+      const userId = req.user!.userId;
 
       const deliveryPartner =
         await this.userService.getDeliveryPartnerByUserId(userId);

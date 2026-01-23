@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Package,
   Truck,
@@ -15,8 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import api from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
+import type { City } from "@/types/global";
+import { CATEGORY_ICON_MAP } from "../../utils/category-icon";
 
-// Types based on Prisma schema
 type OrderStatus =
   | "PENDING"
   | "ACCEPTED"
@@ -28,61 +31,64 @@ type OrderStatus =
 interface OrderItem {
   id: string;
   productId: string;
+  productName: string;
   quantity: number;
   price: number;
-  product: {
-    name: string;
-    imageUrl?: string;
-    category: string;
-  };
+  subtotal: number;
+  category: string;
 }
 
-interface Order {
+export interface Order {
   id: string;
   orderNumber: string;
   status: OrderStatus;
+  city: City;
   deliveryAddress: string;
   totalAmount: number;
   deliveryFee: number;
   notes?: string;
-  createdAt: string;
-  acceptedAt?: string;
-  pickedUpAt?: string;
-  onTheWayAt?: string;
-  deliveredAt?: string;
-  cancelledAt?: string;
-  orderItems: OrderItem[];
+  createdAt: Date;
+  acceptedAt?: Date;
+  pickedUpAt?: Date;
+  onTheWayAt?: Date;
+  deliveredAt?: Date;
+  cancelledAt?: Date;
+  customer: {
+    id: string;
+    name: string;
+    phone?: string;
+  };
   deliveryPartner?: {
-    user: {
-      name: string;
-      phone?: string;
-    };
+    id: string;
+    name: string;
+    phone?: string;
     vehicleType?: string;
   };
+  items: OrderItem[];
 }
+const CategoryIcon = ({ category }: { category: string }) => {
+  const Icon = CATEGORY_ICON_MAP[category];
+  return Icon ? <Icon className="w-6 h-6 text-foreground" /> : null;
+};
 
 const MyOrders = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<"all" | OrderStatus>("all");
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   const fetchOrders = async () => {
-    try {
-      // Replace with your actual API call
-      const response = await fetch("/api/orders/my-orders");
-      const data = await response.json();
-      setOrders(data);
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-    } finally {
-      setLoading(false);
-    }
+    const response = await api.get(`/orders/customer/my-orders`);
+    return response.data.data;
   };
+
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["my-orders"],
+    queryFn: fetchOrders,
+  });
 
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
@@ -135,7 +141,9 @@ const MyOrders = () => {
   const filteredOrders =
     activeFilter === "all"
       ? orders
-      : orders.filter((order) => order.status === activeFilter);
+      : orders.filter((order: Order) => order.status === activeFilter);
+
+  console.log("Filtered Orders:", filteredOrders);
 
   const filters: Array<{ label: string; value: "all" | OrderStatus }> = [
     { label: "All Orders", value: "all" },
@@ -145,7 +153,7 @@ const MyOrders = () => {
     { label: "Cancelled", value: "CANCELLED" },
   ];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto p-4 lg:p-6">
         <div className="flex items-center justify-center h-64">
@@ -158,11 +166,27 @@ const MyOrders = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="container mx-auto p-4 lg:p-6">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center h-64 space-y-2">
+            <XCircle className="w-12 h-12 text-red-500" />
+            <h3 className="text-lg font-semibold">Failed to load orders</h3>
+            <p className="text-muted-foreground text-center">
+              {(error as Error).message || "Something went wrong"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">My Orders</h1>
+        <h2 className="text-2xl font-bold tracking-tight">My Orders</h2>
         <p className="text-muted-foreground">Track and manage your orders</p>
       </div>
 
@@ -196,7 +220,7 @@ const MyOrders = () => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order) => {
+          {filteredOrders.map((order: Order) => {
             const isExpanded = expandedOrder === order.id;
 
             return (
@@ -217,7 +241,7 @@ const MyOrders = () => {
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Placed on {formatDate(order.createdAt)}
+                        Placed on {formatDate(order.createdAt.toString())}
                       </p>
                     </div>
                     <div className="text-right">
@@ -225,8 +249,8 @@ const MyOrders = () => {
                         ₹{order.totalAmount.toFixed(2)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {order.orderItems.length} item
-                        {order.orderItems.length !== 1 ? "s" : ""}
+                        {order.items.length} item
+                        {order.items.length !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
@@ -253,15 +277,15 @@ const MyOrders = () => {
                         <div className="flex-1">
                           <p className="font-medium">Delivery Partner</p>
                           <p className="text-muted-foreground">
-                            {order.deliveryPartner.user.name}
+                            {order.deliveryPartner.name}
                             {order.deliveryPartner.vehicleType &&
                               ` • ${order.deliveryPartner.vehicleType}`}
                           </p>
-                          {order.deliveryPartner.user.phone && (
+                          {order.deliveryPartner.phone && (
                             <div className="flex items-center gap-1 mt-1">
                               <Phone className="w-3 h-3" />
                               <span className="text-muted-foreground">
-                                {order.deliveryPartner.user.phone}
+                                {order.deliveryPartner.phone}
                               </span>
                             </div>
                           )}
@@ -291,31 +315,28 @@ const MyOrders = () => {
 
                     {isExpanded && (
                       <div className="mt-3 space-y-3">
-                        {order.orderItems.map((item) => (
+                        {order.items.map((item) => (
                           <div
                             key={item.id}
                             className="flex items-center gap-3 p-2 rounded-lg bg-muted/50"
                           >
-                            {item.product.imageUrl ? (
-                              <img
-                                src={item.product.imageUrl}
-                                alt={item.product.name}
-                                className="w-12 h-12 object-cover rounded-md"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
-                                <Package className="w-6 h-6 text-muted-foreground" />
-                              </div>
-                            )}
+                            {/* ICON */}
+                            <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center shrink-0">
+                              <CategoryIcon category={item.category} />
+                            </div>
+
+                            {/* NAME + QTY */}
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-sm truncate">
-                                {item.product.name}
+                                {item.productName}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 Qty: {item.quantity} × ₹{item.price.toFixed(2)}
                               </p>
                             </div>
-                            <p className="font-semibold text-sm">
+
+                            {/* PRICE */}
+                            <p className="font-semibold text-sm shrink-0">
                               ₹{(item.quantity * item.price).toFixed(2)}
                             </p>
                           </div>

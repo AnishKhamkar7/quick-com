@@ -2,7 +2,7 @@ import { z } from "zod";
 import { City, OrderStatus } from "@prisma/client";
 
 export const createOrderItemSchema = z.object({
-  productId: z.string().cuid(),
+  productId: z.string(),
   quantity: z.number().int().positive(),
 });
 
@@ -22,7 +22,7 @@ export type CreateOrderInput = z.infer<typeof createOrderSchema>["body"];
 
 export const acceptOrderSchema = z.object({
   params: z.object({
-    orderId: z.string().cuid(),
+    orderId: z.string(),
   }),
 });
 
@@ -30,10 +30,10 @@ export type AcceptOrderParams = z.infer<typeof acceptOrderSchema>["params"];
 
 export const updateOrderStatusSchema = z.object({
   params: z.object({
-    orderId: z.string().cuid(),
+    orderId: z.string(),
   }),
   body: z.object({
-    status: z.nativeEnum(OrderStatus),
+    status: z.enum(OrderStatus),
     notes: z.string().optional(),
   }),
 });
@@ -47,7 +47,7 @@ export type UpdateOrderStatusBody = z.infer<
 
 export const getOrderByIdSchema = z.object({
   params: z.object({
-    orderId: z.string().cuid(),
+    orderId: z.string(),
   }),
 });
 
@@ -55,7 +55,7 @@ export const getCustomerOrdersSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().positive().default(1),
     pageSize: z.coerce.number().int().positive().max(100).default(10),
-    status: z.nativeEnum(OrderStatus).optional(),
+    status: z.enum(OrderStatus).optional(),
   }),
 });
 
@@ -63,16 +63,16 @@ export const getDeliveryPartnerOrdersSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().positive().default(1),
     pageSize: z.coerce.number().int().positive().max(100).default(10),
-    status: z.nativeEnum(OrderStatus).optional(),
+    status: z.enum(OrderStatus).optional(),
   }),
 });
 
 export const wsJoinCityRoomSchema = z.object({
-  city: z.nativeEnum(City),
+  city: z.enum(City),
 });
 
 export const wsJoinOrderRoomSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: z.string(),
 });
 
 export interface OrderItemResponse {
@@ -122,7 +122,6 @@ export interface PaginatedOrdersResponse {
     totalPages: number;
   };
 }
-
 
 export enum WebSocketEvent {
   // City room events (for available delivery partners)

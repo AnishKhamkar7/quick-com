@@ -142,10 +142,8 @@ export default class OrderWebSocketService {
       },
     );
 
-    // Notify delivery partners in the city that this order is no longer available
     socket.emitOrderCancelledByCustomer(order.city, orderId);
 
-    // Also notify in the order room if a delivery partner was assigned
     if (order.deliveryPartner) {
       const wsPayload: WebSocketStatusUpdatePayload = {
         orderId: order.id,

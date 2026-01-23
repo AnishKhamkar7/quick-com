@@ -320,7 +320,6 @@ export default class OrderService {
       throw new Error("Order not found");
     }
 
-    // Authorization check
     if (userRole === "CUSTOMER" && order.customer.userId !== userId) {
       throw new Error("Unauthorized to view this order");
     }
@@ -499,6 +498,7 @@ export default class OrderService {
         quantity: item.quantity,
         price: item.price,
         subtotal: item.price * item.quantity,
+        category: item.product.category,
       })),
     };
   }
