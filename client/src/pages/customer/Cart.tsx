@@ -15,9 +15,10 @@ import { useState } from "react";
 const CartPage = () => {
   const { state, dispatch } = useCart();
   const { user } = useAuth();
-  const [deliveryAddress, setDeliveryAddress] = useState<string | null>(
-    user?.customer?.address ?? null,
-  );
+  console.log("User in cart page:", user);
+  const [deliveryAddress, setDeliveryAddress] = useState<
+    string | null | undefined
+  >(user?.customer?.address === null ? null : user?.customer?.address);
 
   const items = Object.values(state.items);
   const navigate = useNavigate();
@@ -101,7 +102,7 @@ const CartPage = () => {
           </div>
         </div>
       )}
-    
+
       <div className="container mx-auto p-4 lg:p-6 space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold tracking-tight">My Cart</h2>

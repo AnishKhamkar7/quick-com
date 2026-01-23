@@ -1,34 +1,65 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Pencil, Save } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
-// Mocked data (replace with API data later)
-const initialProfile = {
-  name: "Anish Khamkar",
-  email: "anish@example.com",
-  phone: "9876543210",
-  address: "Flat 302, MG Road, Pune, Maharashtra",
-};
+import { useAuth } from "@/context/auth-context";
 
 const CustomerProfile = () => {
-  const [profile, setProfile] = useState(initialProfile);
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+  const [profile, setProfile] = useState(() => ({
+    phone: user?.phone || "",
+    address: user?.customer?.address || "",
+  }));
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfile((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.put("/users/profile", {
+        phone: profile.phone,
+        address: profile.address,
+      });
+      return res.data.data;
+    },
+    onSuccess: () => {
+      toast.success("Profile updated successfully");
+
+      queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
+
+      setIsEditing(false);
+    },
+    onError: () => {
+      toast.error("Failed to update profile");
+    },
+  });
+
   const handleSave = () => {
-    // 🔥 Call update profile API here
-    console.log("Updated profile:", profile);
-    setIsEditing(false);
+    updateProfileMutation.mutate();
+  };
+  const handleEditToggle = () => {
+    if (!isEditing && user) {
+      setProfile({
+        phone: user.phone || "",
+        address: user.customer?.address || "",
+      });
+    }
+
+    setIsEditing((prev) => !prev);
   };
 
   return (
@@ -36,7 +67,7 @@ const CustomerProfile = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+          <h2 className="text-2xl font-bold tracking-tight">My Profile</h2>
           <p className="text-muted-foreground">
             Manage your personal information
           </p>
@@ -44,8 +75,9 @@ const CustomerProfile = () => {
 
         <Button
           variant={isEditing ? "default" : "outline"}
-          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
+          onClick={() => (isEditing ? handleSave() : handleEditToggle())}
           className="gap-2"
+          disabled={updateProfileMutation.isPending}
         >
           {isEditing ? (
             <Save className="w-4 h-4" />
@@ -69,24 +101,14 @@ const CustomerProfile = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Name</Label>
-              <Input
-                name="name"
-                value={profile.name}
-                onChange={handleChange}
-                disabled={!isEditing}
-              />
+              <Input value={user?.name || ""} disabled />
             </div>
 
             <div className="space-y-2">
               <Label>Email</Label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
-                <Input
-                  name="email"
-                  value={profile.email}
-                  disabled
-                  className="pl-9"
-                />
+                <Input value={user?.email || ""} disabled className="pl-9" />
               </div>
             </div>
 
