@@ -8,17 +8,22 @@ import {
   getCustomerOrdersSchema,
   getDeliveryPartnerOrdersSchema,
 } from "./schema";
+import { UsersService } from "../users/service";
 
 export default class OrderHandlerIntegrated {
-  constructor(private orderWsService: OrderWebSocketService) {
+  constructor(
+    private orderWsService: OrderWebSocketService,
+    private userService: UsersService,
+  ) {
+    this.userService = userService;
     this.orderWsService = orderWsService;
   }
   createOrder = async (req: Request, res: Response) => {
     try {
       const { body } = createOrderSchema.parse({ body: req.body });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user!.userId; 
+      const userRole = req.user!.role;
 
       if (userRole !== "CUSTOMER") {
         return res
@@ -26,7 +31,7 @@ export default class OrderHandlerIntegrated {
           .json({ message: "Only customers can create orders" });
       }
 
-      const customer = await this.getCustomerByUserId(userId);
+      const customer = await this.userService.getCustomerByUserId(userId);
       if (!customer) {
         return res.status(404).json({ message: "Customer profile not found" });
       }
@@ -63,7 +68,8 @@ export default class OrderHandlerIntegrated {
           .json({ message: "Only delivery partners can accept orders" });
       }
 
-      const deliveryPartner = await this.getDeliveryPartnerByUserId(userId);
+      const deliveryPartner =
+        await this.userService.getDeliveryPartnerByUserId(userId);
       if (!deliveryPartner) {
         return res
           .status(404)
@@ -108,7 +114,8 @@ export default class OrderHandlerIntegrated {
         });
       }
 
-      const deliveryPartner = await this.getDeliveryPartnerByUserId(userId);
+      const deliveryPartner =
+        await this.userService.getDeliveryPartnerByUserId(userId);
       if (!deliveryPartner) {
         return res
           .status(404)
@@ -151,7 +158,7 @@ export default class OrderHandlerIntegrated {
           .json({ message: "Only customers can cancel their orders" });
       }
 
-      const customer = await this.getCustomerByUserId(userId);
+      const customer = await this.userService.getCustomerByUserId(userId);
       if (!customer) {
         return res.status(404).json({ message: "Customer profile not found" });
       }
@@ -221,8 +228,8 @@ export default class OrderHandlerIntegrated {
     try {
       const { query } = getCustomerOrdersSchema.parse({ query: req.query });
 
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user!.userId;
+      const userRole = req.user!.role;
 
       if (userRole !== "CUSTOMER") {
         return res
@@ -230,7 +237,7 @@ export default class OrderHandlerIntegrated {
           .json({ message: "Only customers can view their orders" });
       }
 
-      const customer = await this.getCustomerByUserId(userId);
+      const customer = await this.userService.getCustomerByUserId(userId);
       if (!customer) {
         return res.status(404).json({ message: "Customer profile not found" });
       }
@@ -275,7 +282,8 @@ export default class OrderHandlerIntegrated {
         });
       }
 
-      const deliveryPartner = await this.getDeliveryPartnerByUserId(userId);
+      const deliveryPartner =
+        await this.userService.getDeliveryPartnerByUserId(userId);
       if (!deliveryPartner) {
         return res
           .status(404)
@@ -302,22 +310,4 @@ export default class OrderHandlerIntegrated {
       });
     }
   };
-
-  // ============================================================================
-  // HELPER METHODS
-  // ============================================================================
-
-  private async getCustomerByUserId(userId: string) {
-    const prisma = (await import("../../db")).default;
-    return prisma.customer.findUnique({
-      where: { userId },
-    });
-  }
-
-  private async getDeliveryPartnerByUserId(userId: string) {
-    const prisma = (await import("../../db")).default;
-    return prisma.deliveryPartner.findUnique({
-      where: { userId },
-    });
-  }
 }

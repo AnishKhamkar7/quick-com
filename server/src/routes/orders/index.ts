@@ -3,13 +3,16 @@ import OrderHandler from "./handler";
 import OrderWebSocketService from "./sockets/order";
 import { authenticate, authorize } from "../../middleware/auth";
 import OrderService from "./service";
+import { UsersService } from "../users/service";
 import { UserRole } from "@prisma/client";
 
 const router = Router();
 
 const orderService = new OrderService();
 const orderWsService = new OrderWebSocketService(orderService);
-const orderHandler = new OrderHandler(orderWsService);
+const userService = new UsersService();
+const orderHandler = new OrderHandler(orderWsService, userService);
+
 router.post(
   "/",
   authenticate,

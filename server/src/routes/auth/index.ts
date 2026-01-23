@@ -13,7 +13,6 @@ router.post("/register", authHandler.register);
 
 router.post("/login", authHandler.login);
 
-router.get("/profile", authenticate, authHandler.getProfile);
 
 router.post("/logout", authHandler.logout);
 

@@ -1,4 +1,4 @@
-import {  OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 import prisma from "../../db";
 import {
   CreateOrderInput,
@@ -11,8 +11,11 @@ export default class OrderService {
   // ============================================================================
   // CREATE ORDER
   // ============================================================================
-  
-  async createOrder(customerId: string, input: CreateOrderInput): Promise<OrderResponse> {
+
+  async createOrder(
+    customerId: string,
+    input: CreateOrderInput,
+  ): Promise<OrderResponse> {
     // Fetch customer to get city
     const customer = await prisma.customer.findUnique({
       where: { id: customerId },
@@ -119,8 +122,11 @@ export default class OrderService {
   // ============================================================================
   // ACCEPT ORDER (Delivery Partner)
   // ============================================================================
-  
-  async acceptOrder(orderId: string, deliveryPartnerId: string): Promise<OrderResponse> {
+
+  async acceptOrder(
+    orderId: string,
+    deliveryPartnerId: string,
+  ): Promise<OrderResponse> {
     // Check if order exists and is pending
     const existingOrder = await prisma.order.findUnique({
       where: { id: orderId },
@@ -200,11 +206,11 @@ export default class OrderService {
   // ============================================================================
   // UPDATE ORDER STATUS
   // ============================================================================
-  
+
   async updateOrderStatus(
     orderId: string,
     deliveryPartnerId: string,
-    input: UpdateOrderStatusBody
+    input: UpdateOrderStatusBody,
   ): Promise<OrderResponse> {
     // Verify order exists and belongs to this delivery partner
     const existingOrder = await prisma.order.findUnique({
@@ -270,7 +276,10 @@ export default class OrderService {
       });
 
       // If order is delivered or cancelled, set delivery partner to available
-      if (input.status === OrderStatus.DELIVERED || input.status === OrderStatus.CANCELLED) {
+      if (
+        input.status === OrderStatus.DELIVERED ||
+        input.status === OrderStatus.CANCELLED
+      ) {
         await tx.deliveryPartner.update({
           where: { id: deliveryPartnerId },
           data: { status: "AVAILABLE" },
@@ -286,8 +295,12 @@ export default class OrderService {
   // ============================================================================
   // GET ORDERS
   // ============================================================================
-  
-  async getOrderById(orderId: string, userId: string, userRole: string): Promise<OrderResponse> {
+
+  async getOrderById(
+    orderId: string,
+    userId: string,
+    userRole: string,
+  ): Promise<OrderResponse> {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -312,7 +325,10 @@ export default class OrderService {
       throw new Error("Unauthorized to view this order");
     }
 
-    if (userRole === "DELIVERY_PARTNER" && order.deliveryPartner?.userId !== userId) {
+    if (
+      userRole === "DELIVERY_PARTNER" &&
+      order.deliveryPartner?.userId !== userId
+    ) {
       throw new Error("Unauthorized to view this order");
     }
 
@@ -323,7 +339,7 @@ export default class OrderService {
     customerId: string,
     page: number,
     pageSize: number,
-    status?: OrderStatus
+    status?: OrderStatus,
   ): Promise<PaginatedOrdersResponse> {
     const skip = (page - 1) * pageSize;
 
@@ -368,7 +384,7 @@ export default class OrderService {
     deliveryPartnerId: string,
     page: number,
     pageSize: number,
-    status?: OrderStatus
+    status?: OrderStatus,
   ): Promise<PaginatedOrdersResponse> {
     const skip = (page - 1) * pageSize;
 
@@ -409,16 +425,12 @@ export default class OrderService {
     };
   }
 
-  // ============================================================================
-  // HELPER METHODS
-  // ============================================================================
-  
   private async generateOrderNumber(): Promise<string> {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
-    
+
     const count = await prisma.order.count({
       where: {
         createdAt: {
@@ -431,7 +443,10 @@ export default class OrderService {
     return `ORD${year}${month}${day}${sequence}`;
   }
 
-  private validateStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus): void {
+  private validateStatusTransition(
+    currentStatus: OrderStatus,
+    newStatus: OrderStatus,
+  ): void {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
       [OrderStatus.PENDING]: [OrderStatus.ACCEPTED, OrderStatus.CANCELLED],
       [OrderStatus.ACCEPTED]: [OrderStatus.PICKED_UP, OrderStatus.CANCELLED],
@@ -443,7 +458,7 @@ export default class OrderService {
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       throw new Error(
-        `Invalid status transition from ${currentStatus} to ${newStatus}`
+        `Invalid status transition from ${currentStatus} to ${newStatus}`,
       );
     }
   }

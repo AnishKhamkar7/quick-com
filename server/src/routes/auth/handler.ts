@@ -83,7 +83,6 @@ export class AuthHandler {
 
       const result = await this.authService.login({ email, password });
 
-      // Set httpOnly cookie
       res.cookie("token", result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -114,34 +113,5 @@ export class AuthHandler {
       success: true,
       message: "Logged out successfully",
     });
-  };
-
-  getProfile = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user?.userId;
-
-      if (!userId) {
-        return res.status(401).json({
-          success: false,
-          message: "Unauthorized",
-        });
-      }
-
-      const user = await this.authService.getUserById(userId);
-
-      res.status(200).json({
-        success: true,
-        data: user,
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(404).json({
-          success: false,
-          message: error.message,
-        });
-      } else {
-        next(error);
-      }
-    }
   };
 }

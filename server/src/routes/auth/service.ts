@@ -152,36 +152,4 @@ export class AuthService {
       token,
     };
   }
-
-  async getUserById(userId: string) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-        customer: {
-          select: {
-            id: true,
-            address: true,
-          },
-        },
-        deliveryPartner: {
-          select: {
-            id: true,
-            vehicleType: true,
-            status: true,
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return user;
-  }
 }
