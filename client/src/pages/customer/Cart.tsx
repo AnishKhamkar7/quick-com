@@ -89,7 +89,8 @@ const CartPage = () => {
       },
       onError: (error) => {
         toast.error("Failed to place order", {
-          description: error.response?.data?.message || "Something went wrong",
+          description:
+            error instanceof Error ? error.message : "Something went wrong",
         });
       },
     });

@@ -24,6 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", routes);
 
+
+
 // Global error handler
 app.use((err: any, req: any, res: any, next: any) => {
   console.error(err);

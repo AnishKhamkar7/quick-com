@@ -11,7 +11,11 @@ const router = Router();
 const orderService = new OrderService();
 const orderWsService = new OrderWebSocketService(orderService);
 const userService = new UsersService();
-const orderHandler = new OrderHandler(orderWsService, userService);
+const orderHandler = new OrderHandler(
+  orderWsService,
+  userService,
+  orderService,
+);
 
 router.post(
   "/",

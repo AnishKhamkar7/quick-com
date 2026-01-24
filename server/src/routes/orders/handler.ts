@@ -9,14 +9,18 @@ import {
   getDeliveryPartnerOrdersSchema,
 } from "./schema";
 import { UsersService } from "../users/service";
+import OrderService from "./service";
+import { OrderStatus } from "@prisma/client";
 
 export default class OrderHandlerIntegrated {
   constructor(
     private orderWsService: OrderWebSocketService,
     private userService: UsersService,
+    private orderService: OrderService,
   ) {
     this.userService = userService;
     this.orderWsService = orderWsService;
+    this.orderService = orderService;
   }
   createOrder = async (req: Request, res: Response) => {
     try {
@@ -52,16 +56,46 @@ export default class OrderHandlerIntegrated {
     try {
       const { params } = acceptOrderSchema.parse({ params: req.params });
 
-      const userId = req.user!.userId;
+      const userId = req.user?.userId;
 
-      const deliveryPartner =
-        await this.userService.getDeliveryPartnerByUserId(userId);
+      const deliveryPartner = await this.userService.getDeliveryPartnerByUserId(
+        userId!,
+      );
+
+      const existingOrder = await this.orderService.getOrderById(
+        params.orderId,
+      );
+
+      if (!existingOrder) {
+        throw new Error("Order not found");
+      }
+
+      if (existingOrder.status !== OrderStatus.PENDING) {
+        throw new Error("Order is no longer available for acceptance");
+      }
+
+      if (existingOrder.deliveryPartnerId) {
+        throw new Error("Order already assigned to another delivery partner");
+      }
+
       if (!deliveryPartner) {
         return res
           .status(404)
           .json({ message: "Delivery partner profile not found" });
       }
+      if (!deliveryPartner) {
+        throw new Error("Delivery partner not found");
+      }
 
+      if (deliveryPartner.status !== "AVAILABLE") {
+        throw new Error("Delivery partner is not available");
+      }
+
+      if (deliveryPartner.city !== existingOrder.city) {
+        throw new Error(
+          "Delivery partner is not in the same city as the order",
+        );
+      }
       const order = await this.orderWsService.acceptOrder(
         params.orderId,
         deliveryPartner.id,

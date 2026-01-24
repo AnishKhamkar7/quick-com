@@ -127,42 +127,6 @@ export default class OrderService {
     orderId: string,
     deliveryPartnerId: string,
   ): Promise<OrderResponse> {
-    // Check if order exists and is pending
-    const existingOrder = await prisma.order.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!existingOrder) {
-      throw new Error("Order not found");
-    }
-
-    if (existingOrder.status !== OrderStatus.PENDING) {
-      throw new Error("Order is no longer available for acceptance");
-    }
-
-    if (existingOrder.deliveryPartnerId) {
-      throw new Error("Order already assigned to another delivery partner");
-    }
-
-    // Check if delivery partner exists and is available
-    const deliveryPartner = await prisma.deliveryPartner.findUnique({
-      where: { id: deliveryPartnerId },
-    });
-
-    if (!deliveryPartner) {
-      throw new Error("Delivery partner not found");
-    }
-
-    if (deliveryPartner.status !== "AVAILABLE") {
-      throw new Error("Delivery partner is not available");
-    }
-
-    // Check if cities match
-    if (deliveryPartner.city !== existingOrder.city) {
-      throw new Error("Delivery partner is not in the same city as the order");
-    }
-
-    // Update order and delivery partner status
     const order = await prisma.$transaction(async (tx) => {
       const updatedOrder = await tx.order.update({
         where: { id: orderId },
@@ -188,7 +152,7 @@ export default class OrderService {
         data: {
           orderId,
           status: OrderStatus.ACCEPTED,
-          notes: `Order accepted by ${deliveryPartner.id}`,
+          notes: `Order accepted by ${deliveryPartnerId}`,
         },
       });
 
@@ -296,42 +260,15 @@ export default class OrderService {
   // GET ORDERS
   // ============================================================================
 
-  async getOrderById(
-    orderId: string,
-    userId: string,
-    userRole: string,
-  ): Promise<OrderResponse> {
+  async getOrderById(orderId: string) {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        customer: {
-          include: { user: true },
-        },
-        deliveryPartner: {
-          include: { user: true },
-        },
-        orderItems: {
-          include: { product: true },
-        },
-      },
     });
 
     if (!order) {
       throw new Error("Order not found");
     }
-
-    if (userRole === "CUSTOMER" && order.customer.userId !== userId) {
-      throw new Error("Unauthorized to view this order");
-    }
-
-    if (
-      userRole === "DELIVERY_PARTNER" &&
-      order.deliveryPartner?.userId !== userId
-    ) {
-      throw new Error("Unauthorized to view this order");
-    }
-
-    return this.mapToOrderResponse(order);
+    return order;
   }
 
   async getCustomerOrders(

@@ -43,7 +43,9 @@ interface HeaderProps {
 
 export function Header({ user, onLogout, links }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+
   const isCustomer = user?.role === "CUSTOMER";
+
   const { totalItems } = useCart();
   const getUserInitials = () =>
     user?.name

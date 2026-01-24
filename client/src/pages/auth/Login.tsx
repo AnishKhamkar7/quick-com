@@ -83,12 +83,7 @@ export default function Login() {
       redirectBasedOnRole(userData.role);
     },
     onError: (err) => {
-      console.log("Login error:", err);
-      setError(
-        err!.response?.data?.message ||
-          err.message ||
-          "Login failed. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Login failed");
     },
   });
 
