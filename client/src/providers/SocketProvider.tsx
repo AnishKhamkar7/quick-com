@@ -85,7 +85,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   useEffect(() => {
     const serverUrl =
-      env.MODE === "development"
+      env.MODE === "development" && env.VITE_API_BASE_URL
         ? env.VITE_API_BASE_URL.replace("/api", "")
         : "/";
 
