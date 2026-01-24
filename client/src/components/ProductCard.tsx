@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, type LucideIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,7 +18,7 @@ export const ProductCard = ({
 }: {
   product: Product;
   onQuantityChange?: (productId: Product, quantity: number) => void;
-  Icon: any;
+  Icon: LucideIcon;
 }) => {
   const [quantity, setQuantity] = useState(0);
 

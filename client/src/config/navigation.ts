@@ -6,8 +6,6 @@ import {
   Truck,
   MapPin,
   User,
-  Box,
-  BoxIcon,
   BoxesIcon,
 } from "lucide-react";
 

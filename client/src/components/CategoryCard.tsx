@@ -1,6 +1,16 @@
+import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 
-export const CategoryCard = ({ category, Icon, onClick }) => {
+type CategoryCardProps = {
+  category: {
+    id: string;
+    name: string;
+  };
+  Icon: LucideIcon;
+  onClick: () => void;
+};
+
+export const CategoryCard = ({ category, Icon, onClick }:CategoryCardProps) => {
   return (
     <Card
       onClick={onClick}

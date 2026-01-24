@@ -12,6 +12,12 @@ import UpdateAddressCard from "@/components/UpdateAdress";
 import { useAuth } from "@/context/auth-context";
 import { useState } from "react";
 
+type Payload = {
+  deliveryAddress: string | null | undefined;
+  notes: string;
+  items: { productId: string; quantity: number }[];
+};
+
 const CartPage = () => {
   const { state, dispatch } = useCart();
   const { user } = useAuth();
@@ -49,7 +55,7 @@ const CartPage = () => {
   const total = subtotal + deliveryFee;
 
   const createOrderMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Payload) => {
       const res = await api.post("/orders", payload);
       return res.data;
     },
@@ -78,8 +84,6 @@ const CartPage = () => {
         toast.success("Order placed successfully 🎉");
 
         dispatch({ type: "CLEAR" });
-
-        // const orderId = res.data.id;
 
         navigate(`/customer/orders`);
       },
