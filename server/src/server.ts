@@ -1,7 +1,7 @@
 import http from "http";
 import app from "./app";
 import dotenv from "dotenv";
-import WebSocketService from "../src/lib/socket";
+import WebSocketService from "./lib/socket";
 
 dotenv.config();
 
