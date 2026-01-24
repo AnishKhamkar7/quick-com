@@ -11,7 +11,7 @@ router.use("/auth", auth);
 router.use("/products", products);
 router.use("/orders", orders);
 router.use("/users", users);
-router.use("health", (_req: Request, res: Response) => {
+router.get("health", (_req: Request, res: Response) => {
   return res.status(200).json({
     message: "API IS WORKING",
   });
