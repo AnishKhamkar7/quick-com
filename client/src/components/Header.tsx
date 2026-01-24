@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Sidebar } from "./sidebar";
+import { Sidebar } from "@/components/Sidebar";
 import { useTheme } from "@/hooks/use-theme";
 import { useCart } from "@/context/cart-context";
 
