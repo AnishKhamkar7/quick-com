@@ -8,10 +8,7 @@ import {
   type WebSocketStatusUpdatePayload,
   type City,
 } from "../types/global";
-
-// ============================================================================
-// WEBSOCKET PROVIDER
-// ============================================================================
+import { env } from "@/env";
 
 interface WebSocketProviderProps {
   children: React.ReactNode;
@@ -25,12 +22,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const reconnectTimeoutRef = useRef<number | undefined>(undefined);
   const hasShownConnectedToast = useRef(false);
 
-  // ============================================================================
-  // GLOBAL EVENT LISTENERS (For notifications across the app)
-  // ============================================================================
-
   const setupGlobalListeners = (socket: Socket) => {
-    // Order Accepted
     socket.on(
       WebSocketEvent.ORDER_ACCEPTED,
       (data: WebSocketStatusUpdatePayload) => {
@@ -41,7 +33,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       },
     );
 
-    // Order Picked Up
     socket.on(WebSocketEvent.ORDER_PICKED_UP, () => {
       toast.info("📦 Order Picked Up", {
         description:
@@ -50,7 +41,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       });
     });
 
-    // Order On The Way
     socket.on(
       WebSocketEvent.ORDER_ON_THE_WAY,
       (data: WebSocketStatusUpdatePayload) => {
@@ -61,7 +51,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       },
     );
 
-    // Order Delivered
     socket.on(WebSocketEvent.ORDER_DELIVERED, () => {
       toast.success("✅ Order Delivered!", {
         description: "Your order has been delivered. Enjoy!",
@@ -69,7 +58,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       });
     });
 
-    // Order Cancelled
     socket.on(
       WebSocketEvent.ORDER_CANCELLED,
       (data: WebSocketStatusUpdatePayload) => {
@@ -80,7 +68,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       },
     );
 
-    // New Order (For Delivery Partners)
     socket.on(WebSocketEvent.NEW_ORDER, (data: WebSocketOrderPayload) => {
       toast.info("🆕 New Order Available", {
         description: `Order #${data.orderNumber} - ₹${data.totalAmount}`,
@@ -88,7 +75,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       });
     });
 
-    // Error events
     socket.on(WebSocketEvent.ERROR, (error: { message: string }) => {
       toast.error("WebSocket Error", {
         description: error.message,
@@ -97,19 +83,14 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     });
   };
 
-  // ============================================================================
-  // INITIALIZE SOCKET
-  // ============================================================================
-
   useEffect(() => {
-    // For cookie-based auth, we don't need to check token
-    // The cookie is sent automatically with the connection
     const serverUrl =
-      import.meta.env.VITE_API_BASE_URL?.replace("/api", "") ||
-      "http://localhost:5000";
+      env.MODE === "development"
+        ? env.VITE_API_BASE_URL.replace("/api", "")
+        : "/";
 
     const newSocket = io(serverUrl, {
-      withCredentials: true, // Important: Send cookies with the request
+      withCredentials: true,
       transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -117,15 +98,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       reconnectionAttempts: 5,
     });
 
-    // Store socket in ref
     socketRef.current = newSocket;
 
-    // Connection events
     newSocket.on("connect", () => {
       console.log("✅ WebSocket connected:", newSocket.id);
       setIsConnected(true);
 
-      // Only show toast once per session
       if (!hasShownConnectedToast.current) {
         toast.success("Connected", {
           description: "Real-time updates enabled",
@@ -145,10 +123,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       setIsConnected(false);
     });
 
-    // Setup global event listeners
     setupGlobalListeners(newSocket);
 
-    // Cleanup
     return () => {
       if (reconnectTimeoutRef.current) {
         window.clearTimeout(reconnectTimeoutRef.current);
@@ -157,10 +133,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       socketRef.current = null;
     };
   }, []);
-
-  // ============================================================================
-  // ROOM METHODS
-  // ============================================================================
 
   const joinOrderRoom = (orderId: string) => {
     const socket = socketRef.current;
@@ -205,11 +177,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       console.log(`👋 Left city room: ${data.city}`);
     });
   };
-
-  // ============================================================================
-  // CONTEXT VALUE
-  // ============================================================================
-
   const value = {
     isConnected,
     joinOrderRoom,
