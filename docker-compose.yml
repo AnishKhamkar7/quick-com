@@ -33,14 +33,14 @@ services:
       postgres:
         condition: service_healthy
 
-  # client:
-  #   build: ./client
-  #   container_name: client
-  #   restart: unless-stopped
-  #   ports:
-  #     - "3000:80"
-  #   depends_on:
-  #     - server
+  client:
+    build: ./client
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
 
 volumes:
   postgres_data:
