@@ -284,7 +284,7 @@ export default class OrderHandlerIntegrated {
           .status(404)
           .json({ message: "Delivery partner profile not found" });
       }
-
+      console.log("CITY", query.city);
       if (deliveryPartner.city !== query.city) {
         return res.status(403).json({
           message: "You are not allowed to access orders for this city",
@@ -292,10 +292,6 @@ export default class OrderHandlerIntegrated {
       }
 
       const orders = await this.orderService.getDeliveryPartnerOrders({
-        deliveryPartnerId: deliveryPartner.id,
-        page: query.page,
-        pageSize: query.pageSize,
-        status: query.status,
         city: query.city,
       });
 

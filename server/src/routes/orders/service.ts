@@ -316,35 +316,13 @@ export default class OrderService {
     };
   }
 
-  async getDeliveryPartnerOrders({
-    deliveryPartnerId,
-    city,
-    page,
-    pageSize,
-    status,
-  }: {
-    deliveryPartnerId: string;
-    city: City;
-    page: number;
-    pageSize: number;
-    status?: OrderStatus;
-  }): Promise<PaginatedOrdersResponse> {
-    const skip = (page - 1) * pageSize;
-
-    const where: any = {
-      deliveryPartnerId,
-      city,
-    };
-
-    if (status) {
-      where.status = status;
-    }
-
+  async getDeliveryPartnerOrders({ city }: { city: City }) {
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
-        where,
-        skip,
-        take: pageSize,
+        where: {
+          status: "PENDING",
+          city,
+        },
         orderBy: { createdAt: "desc" },
         include: {
           customer: { include: { user: true } },
@@ -352,16 +330,18 @@ export default class OrderService {
           orderItems: { include: { product: true } },
         },
       }),
-      prisma.order.count({ where }),
+      prisma.order.count({
+        where: {
+          status: "PENDING",
+          city,
+        },
+      }),
     ]);
 
     return {
       data: orders.map(this.mapToOrderResponse),
       meta: {
         total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize),
       },
     };
   }

@@ -69,9 +69,6 @@ export const getCustomerOrdersSchema = z.object({
 export const getDeliveryPartnerOrdersSchema = z.object({
   query: z.object({
     city: z.enum(cityValues),
-    page: z.coerce.number().int().positive().default(1),
-    pageSize: z.coerce.number().int().positive().max(100).default(10),
-    status: z.enum(orderStatusValues).optional(),
   }),
 });
 
