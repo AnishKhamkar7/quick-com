@@ -3,7 +3,7 @@ import { type Theme, ThemeContext } from "@/hooks/use-theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
+    if (typeof window === "undefined") return "dark";
 
     const saved = localStorage.getItem("theme") as Theme | null;
     if (saved) return saved;
