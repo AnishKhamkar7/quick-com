@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
+import { Link } from "react-router-dom";
 
 type OrderStatus =
   | "PENDING"
@@ -282,14 +283,16 @@ export default function DeliveryPartnerDashboard() {
             <p className="text-muted-foreground">
               You don't have any active deliveries right now.
             </p>
-            <Button
-              size="lg"
-              onClick={() => {
-                /* Navigate to available orders */
-              }}
-            >
-              View Available Deliveries
-            </Button>
+            <Link to="/delivery/orders">
+              <Button
+                size="lg"
+                onClick={() => {
+                  /* Navigate to available orders */
+                }}
+              >
+                View Available Deliveries
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       ) : (
