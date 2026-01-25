@@ -45,26 +45,15 @@ export class UsersHandler {
       }
 
       if (role === "DELIVERY_PARTNER" && updateData.vehicleType) {
-        const deliveryPartner = await this.userService.updateDeliveryPartnerProfile(
-          userId,
-          {
+        const deliveryPartner =
+          await this.userService.updateDeliveryPartnerProfile(userId, {
             vehicleType: updateData.vehicleType,
-          },
-        );
+          });
         return res.status(200).json({
           success: true,
           data: deliveryPartner,
         });
       }
-
-      const updatedUser = await this.userService.updateUserProfile(
-        userId!,
-        updateData,
-      );
-      return res.status(200).json({
-        success: true,
-        data: updatedUser,
-      });
     } catch (error) {
       return res.status(500).json({
         success: false,

@@ -401,6 +401,50 @@ export default class OrderService {
 
     return this.mapToOrderResponse(order);
   }
+  async getDeliveryPartnerDeliveredHistoryOrders({
+    deliveryPartnerId,
+    city,
+    page,
+    pageSize,
+  }: {
+    deliveryPartnerId: string;
+    city: City;
+    page: number;
+    pageSize: number;
+  }): Promise<PaginatedOrdersResponse> {
+    const skip = (page - 1) * pageSize;
+
+    const where = {
+      deliveryPartnerId,
+      city,
+      status: OrderStatus.DELIVERED,
+    };
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { deliveredAt: "desc" },
+        include: {
+          customer: { include: { user: true } },
+          deliveryPartner: { include: { user: true } },
+          orderItems: { include: { product: true } },
+        },
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return {
+      data: orders.map(this.mapToOrderResponse),
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  }
 
   private async generateOrderNumber(): Promise<string> {
     const date = new Date();

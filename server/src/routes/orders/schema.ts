@@ -137,6 +137,14 @@ export interface PaginatedOrdersResponse {
   };
 }
 
+export const getDeliveryPartnerDeliveredHistorySchema = z.object({
+  query: z.object({
+    city: z.enum(cityValues),
+    page: z.coerce.number().int().positive().default(1),
+    pageSize: z.coerce.number().int().positive().max(100).default(10),
+  }),
+});
+
 export enum WebSocketEvent {
   // City room events (for available delivery partners)
   NEW_ORDER = "new_order",

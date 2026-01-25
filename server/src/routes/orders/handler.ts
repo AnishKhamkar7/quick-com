@@ -8,6 +8,7 @@ import {
   getCustomerOrdersSchema,
   getDeliveryPartnerOrdersSchema,
   getDeliveryPartnerActiveOrderSchema,
+  getDeliveryPartnerDeliveredHistorySchema,
 } from "./schema";
 import { UsersService } from "../users/service";
 import OrderService from "./service";
@@ -351,6 +352,60 @@ export default class OrderHandlerIntegrated {
 
       return res.status(400).json({
         message: error.message || "Failed to get active order",
+      });
+    }
+  };
+
+  getDeliveryPartnerDeliveredHistoryOrders = async (
+    req: Request,
+    res: Response,
+  ) => {
+    try {
+      const { query } = getDeliveryPartnerDeliveredHistorySchema.parse({
+        query: req.query,
+      });
+
+      const userId = req.user!.userId;
+
+      const deliveryPartner =
+        await this.userService.getDeliveryPartnerByUserId(userId);
+
+      if (!deliveryPartner) {
+        return res
+          .status(404)
+          .json({ message: "Delivery partner profile not found" });
+      }
+
+      if (deliveryPartner.city !== query.city) {
+        return res.status(403).json({
+          message: "You are not allowed to access orders for this city",
+        });
+      }
+
+      const orders =
+        await this.orderService.getDeliveryPartnerDeliveredHistoryOrders({
+          deliveryPartnerId: deliveryPartner.id,
+          city: query.city,
+          page: query.page,
+          pageSize: query.pageSize,
+        });
+
+      return res.json(orders);
+    } catch (error: any) {
+      console.error(
+        "Get delivery partner delivered history orders error:",
+        error,
+      );
+
+      if (error.errors) {
+        return res
+          .status(400)
+          .json({ message: "Validation error", errors: error.errors });
+      }
+
+      return res.status(400).json({
+        message:
+          error.message || "Failed to get delivery partner delivered history",
       });
     }
   };
