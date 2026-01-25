@@ -328,7 +328,6 @@ export default class OrderHandlerIntegrated {
           .json({ message: "Delivery partner profile not found" });
       }
 
-      // 🔐 City validation (same as list handler)
       if (deliveryPartner.city !== query.city) {
         return res.status(403).json({
           message: "You are not allowed to access orders for this city",

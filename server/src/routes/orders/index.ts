@@ -60,7 +60,7 @@ router.get(
 );
 
 router.get(
-  "/active",
+  "/delivery-partner/active",
   authenticate,
   authorize(UserRole.DELIVERY_PARTNER),
   orderHandler.getDeliveryPartnerActiveOrder,
