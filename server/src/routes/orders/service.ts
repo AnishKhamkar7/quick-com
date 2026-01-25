@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import { City, OrderStatus } from "@prisma/client";
 import prisma from "../../db";
 import {
   CreateOrderInput,
@@ -316,15 +316,26 @@ export default class OrderService {
     };
   }
 
-  async getDeliveryPartnerOrders(
-    deliveryPartnerId: string,
-    page: number,
-    pageSize: number,
-    status?: OrderStatus,
-  ): Promise<PaginatedOrdersResponse> {
+  async getDeliveryPartnerOrders({
+    deliveryPartnerId,
+    city,
+    page,
+    pageSize,
+    status,
+  }: {
+    deliveryPartnerId: string;
+    city: City;
+    page: number;
+    pageSize: number;
+    status?: OrderStatus;
+  }): Promise<PaginatedOrdersResponse> {
     const skip = (page - 1) * pageSize;
 
-    const where: any = { deliveryPartnerId };
+    const where: any = {
+      deliveryPartnerId,
+      city,
+    };
+
     if (status) {
       where.status = status;
     }
@@ -336,15 +347,9 @@ export default class OrderService {
         take: pageSize,
         orderBy: { createdAt: "desc" },
         include: {
-          customer: {
-            include: { user: true },
-          },
-          deliveryPartner: {
-            include: { user: true },
-          },
-          orderItems: {
-            include: { product: true },
-          },
+          customer: { include: { user: true } },
+          deliveryPartner: { include: { user: true } },
+          orderItems: { include: { product: true } },
         },
       }),
       prisma.order.count({ where }),
@@ -359,6 +364,42 @@ export default class OrderService {
         totalPages: Math.ceil(total / pageSize),
       },
     };
+  }
+
+  async getDeliveryPartnerActiveOrder({
+    deliveryPartnerId,
+    city,
+  }: {
+    deliveryPartnerId: string;
+    city: City;
+  }): Promise<OrderResponse | null> {
+    const order = await prisma.order.findFirst({
+      where: {
+        deliveryPartnerId,
+        city,
+        status: {
+          in: [
+            OrderStatus.ACCEPTED,
+            OrderStatus.PICKED_UP,
+            OrderStatus.ON_THE_WAY,
+          ],
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        customer: { include: { user: true } },
+        deliveryPartner: { include: { user: true } },
+        orderItems: { include: { product: true } },
+      },
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    return this.mapToOrderResponse(order);
   }
 
   private async generateOrderNumber(): Promise<string> {

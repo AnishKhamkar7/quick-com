@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import { City, OrderStatus } from "@prisma/client";
 import OrderService from "../service";
 import { socket } from "../../../server";
 import {
@@ -166,20 +166,6 @@ export default class OrderWebSocketService {
   ) {
     return this.orderService.getCustomerOrders(
       customerId,
-      page,
-      pageSize,
-      status,
-    );
-  }
-
-  async getDeliveryPartnerOrders(
-    deliveryPartnerId: string,
-    page: number,
-    pageSize: number,
-    status?: OrderStatus,
-  ) {
-    return this.orderService.getDeliveryPartnerOrders(
-      deliveryPartnerId,
       page,
       pageSize,
       status,

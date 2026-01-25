@@ -7,6 +7,7 @@ import {
   getOrderByIdSchema,
   getCustomerOrdersSchema,
   getDeliveryPartnerOrdersSchema,
+  getDeliveryPartnerActiveOrderSchema,
 } from "./schema";
 import { UsersService } from "../users/service";
 import OrderService from "./service";
@@ -283,12 +284,19 @@ export default class OrderHandlerIntegrated {
           .json({ message: "Delivery partner profile not found" });
       }
 
-      const orders = await this.orderWsService.getDeliveryPartnerOrders(
-        deliveryPartner.id,
-        query.page,
-        query.pageSize,
-        query.status,
-      );
+      if (deliveryPartner.city !== query.city) {
+        return res.status(403).json({
+          message: "You are not allowed to access orders for this city",
+        });
+      }
+
+      const orders = await this.orderService.getDeliveryPartnerOrders({
+        deliveryPartnerId: deliveryPartner.id,
+        page: query.page,
+        pageSize: query.pageSize,
+        status: query.status,
+        city: query.city,
+      });
 
       return res.json(orders);
     } catch (error: any) {
@@ -300,6 +308,50 @@ export default class OrderHandlerIntegrated {
       }
       return res.status(400).json({
         message: error.message || "Failed to get delivery partner orders",
+      });
+    }
+  };
+  getDeliveryPartnerActiveOrder = async (req: Request, res: Response) => {
+    try {
+      const { query } = getDeliveryPartnerActiveOrderSchema.parse({
+        query: req.query,
+      });
+
+      const userId = req.user!.userId;
+
+      const deliveryPartner =
+        await this.userService.getDeliveryPartnerByUserId(userId);
+
+      if (!deliveryPartner) {
+        return res
+          .status(404)
+          .json({ message: "Delivery partner profile not found" });
+      }
+
+      // 🔐 City validation (same as list handler)
+      if (deliveryPartner.city !== query.city) {
+        return res.status(403).json({
+          message: "You are not allowed to access orders for this city",
+        });
+      }
+
+      const order = await this.orderService.getDeliveryPartnerActiveOrder({
+        deliveryPartnerId: deliveryPartner.id,
+        city: query.city,
+      });
+
+      return res.json(order);
+    } catch (error: any) {
+      console.error("Get delivery partner active order error:", error);
+
+      if (error.errors) {
+        return res
+          .status(400)
+          .json({ message: "Validation error", errors: error.errors });
+      }
+
+      return res.status(400).json({
+        message: error.message || "Failed to get active order",
       });
     }
   };

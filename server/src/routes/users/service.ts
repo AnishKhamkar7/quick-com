@@ -20,6 +20,7 @@ export class UsersService {
           select: {
             id: true,
             vehicleType: true,
+            city: true,
             status: true,
           },
         },

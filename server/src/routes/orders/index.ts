@@ -59,4 +59,11 @@ router.get(
   orderHandler.getOrderById,
 );
 
+router.get(
+  "/active",
+  authenticate,
+  authorize(UserRole.DELIVERY_PARTNER),
+  orderHandler.getDeliveryPartnerActiveOrder,
+);
+
 export default router;

@@ -6,6 +6,13 @@ export const createOrderItemSchema = z.object({
   quantity: z.number().int().positive(),
 });
 
+const orderStatusValues = Object.values(OrderStatus) as [
+  OrderStatus,
+  ...OrderStatus[],
+];
+
+const cityValues = Object.values(City) as [City, ...City[]];
+
 export const createOrderSchema = z.object({
   body: z.object({
     deliveryAddress: z
@@ -33,7 +40,7 @@ export const updateOrderStatusSchema = z.object({
     orderId: z.string(),
   }),
   body: z.object({
-    status: z.enum(OrderStatus),
+    status: z.enum(orderStatusValues),
     notes: z.string().optional(),
   }),
 });
@@ -55,20 +62,27 @@ export const getCustomerOrdersSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().positive().default(1),
     pageSize: z.coerce.number().int().positive().max(100).default(10),
-    status: z.enum(OrderStatus).optional(),
+    status: z.enum(orderStatusValues).optional(),
   }),
 });
 
 export const getDeliveryPartnerOrdersSchema = z.object({
   query: z.object({
+    city: z.enum(cityValues),
     page: z.coerce.number().int().positive().default(1),
     pageSize: z.coerce.number().int().positive().max(100).default(10),
-    status: z.enum(OrderStatus).optional(),
+    status: z.enum(orderStatusValues).optional(),
+  }),
+});
+
+export const getDeliveryPartnerActiveOrderSchema = z.object({
+  query: z.object({
+    city: z.enum(cityValues),
   }),
 });
 
 export const wsJoinCityRoomSchema = z.object({
-  city: z.enum(City),
+  city: z.enum(cityValues),
 });
 
 export const wsJoinOrderRoomSchema = z.object({
