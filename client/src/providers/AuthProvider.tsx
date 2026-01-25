@@ -4,7 +4,7 @@ import { AuthContext } from "../context/auth-context";
 import api from "@/lib/axios";
 import type { City } from "@/types/global";
 
-interface User {
+export interface User {
   id: string;
   email: string;
   name: string;
@@ -29,6 +29,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   isLoading: boolean;
+  isFetching: boolean;
 }
 
 interface RegisterData {
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const {
     data: user = null,
     isLoading,
+    isFetching,
     refetch: checkAuth,
   } = useQuery({
     queryKey: ["auth", "profile"],
@@ -84,15 +86,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
-      queryClient.setQueryData(["auth", "profile"], data);
+    onSuccess: async () => {
+      console.log("ITS REFREHSINGGGGG");
+      await checkAuth();
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.setQueryData(["auth", "profile"], data);
+      await checkAuth();
     },
   });
 
@@ -125,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         checkAuth: () => checkAuth().then(() => {}),
         isLoading,
+        isFetching,
       }}
     >
       {children}

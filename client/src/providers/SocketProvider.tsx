@@ -89,16 +89,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   // Auto join city room for delivery partners
   useEffect(() => {
     const joinDeliveryPartnerCityRoom = async () => {
-      console.log("OUTISDE OF THE USEFEECT COND");
-      console.log("SOCKET REF", socketRef.current);
-      console.log("CONNECTED", isConnected);
       const city = user?.deliveryPartner?.city;
       if (
         user?.role !== "DELIVERY_PARTNER" ||
         !socketRef.current ||
         !isConnected
       ) {
-        console.log("IDK WHY YOU RETURNED");
         return;
       }
 

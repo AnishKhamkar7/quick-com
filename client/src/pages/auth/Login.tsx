@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
@@ -55,43 +55,17 @@ export default function Login() {
   >({});
   const [error, setError] = useState("");
 
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const redirectBasedOnRole = useCallback(
-    (role: string) => {
-      switch (role) {
-        case "ADMIN":
-          navigate("/admin/dashboard", { replace: true });
-          break;
-        case "DELIVERY_PARTNER":
-          navigate("/delivery/dashboard", { replace: true });
-          break;
-        case "CUSTOMER":
-          navigate("/customer/home", { replace: true });
-          break;
-        default:
-          navigate("/", { replace: true });
-      }
-    },
-    [navigate],
-  );
+  const { checkAuth } = useAuth();
 
   const loginMutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: (userData) => {
-      redirectBasedOnRole(userData.role);
+    onSuccess: async () => {
+      await checkAuth();
     },
     onError: (err) => {
       setError(err instanceof Error ? err.message : "Login failed");
     },
   });
-
-  useEffect(() => {
-    if (user?.id) {
-      redirectBasedOnRole(user.role);
-    }
-  }, [user?.id, user?.role, redirectBasedOnRole]);
 
   const handleChange = (field: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -118,7 +92,7 @@ export default function Login() {
       return;
     }
 
-    loginMutation.mutate(formData);
+    await loginMutation.mutateAsync(formData);
   };
 
   return (

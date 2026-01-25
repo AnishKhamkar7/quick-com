@@ -1,13 +1,10 @@
-import { Link } from "react-router-dom";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -15,9 +12,7 @@ export default function NotFound() {
       <Card className="w-full max-w-md text-center">
         <CardHeader>
           <CardTitle className="text-6xl font-bold">404</CardTitle>
-          <CardDescription>
-            Page not found
-          </CardDescription>
+          <CardDescription>Page not found</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -25,12 +20,6 @@ export default function NotFound() {
             The page you are trying to access doesn’t exist or has been moved.
           </p>
         </CardContent>
-
-        <CardFooter className="flex justify-center">
-          <Button asChild>
-            <Link to="/">Go back home</Link>
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );
