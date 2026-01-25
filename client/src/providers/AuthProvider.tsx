@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../context/auth-context";
 import api from "@/lib/axios";
+import type { City } from "@/types/global";
 
 interface User {
   id: string;
@@ -16,6 +17,7 @@ interface User {
     status: string;
     id: string;
     vehicleType: string | null;
+    city: City | null;
   } | null;
   phone: string | null;
 }

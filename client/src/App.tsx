@@ -1,13 +1,8 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
 import DashboardLayout from "@/layout/DashboardLayout";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
-import DeliveryPartnerDashboard from "@/pages/dashboard/DeliveryDashboard";
+import DeliveryPartnerDashboard from "@/pages/delivery/DeliveryDashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import AuthLayout from "./layout/AuthLayout";
@@ -23,6 +18,8 @@ import { CartProvider } from "./providers/CartProvider";
 import ProductsPage from "./pages/customer/ProductsPage";
 import { Toaster } from "./components/ui/sonner";
 import { WebSocketProvider } from "./providers/SocketProvider";
+import AvailableOrdersPage from "./pages/delivery/AvailableOrder";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -57,12 +54,16 @@ function App() {
                       path="/delivery/dashboard"
                       element={<DeliveryPartnerDashboard />}
                     />
+                    <Route
+                      path="/delivery/orders"
+                      element={<AvailableOrdersPage />}
+                    />
                   </Route>
 
-                  <Route
+                  {/* <Route
                     path="/"
                     element={<Navigate to="/customer/home" replace />}
-                  />
+                  /> */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </CartProvider>
