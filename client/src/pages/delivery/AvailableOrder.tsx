@@ -177,17 +177,6 @@ export default function AvailableOrdersPage() {
               Live
             </Badge>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isFetching}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
         </div>
       </div>
 
