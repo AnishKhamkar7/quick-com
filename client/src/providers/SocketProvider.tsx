@@ -9,6 +9,7 @@ import {
   type City,
 } from "../types/global";
 import { env } from "@/env";
+import { useAuth } from "@/context/auth-context";
 
 interface WebSocketProviderProps {
   children: React.ReactNode;
@@ -21,6 +22,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const reconnectTimeoutRef = useRef<number | undefined>(undefined);
   const hasShownConnectedToast = useRef(false);
+  const currentCityRoomRef = useRef<string | null>(null);
+  const { user } = useAuth();
 
   const setupGlobalListeners = (socket: Socket) => {
     socket.on(
@@ -82,6 +85,62 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       });
     });
   };
+
+  // Auto join city room for delivery partners
+  useEffect(() => {
+    const joinDeliveryPartnerCityRoom = async () => {
+      console.log("OUTISDE OF THE USEFEECT COND");
+      console.log("SOCKET REF", socketRef.current);
+      console.log("CONNECTED", isConnected);
+      const city = user?.deliveryPartner?.city;
+      if (
+        user?.role !== "DELIVERY_PARTNER" ||
+        !socketRef.current ||
+        !isConnected
+      ) {
+        console.log("IDK WHY YOU RETURNED");
+        return;
+      }
+
+      try {
+        if (city) {
+          if (
+            currentCityRoomRef.current &&
+            currentCityRoomRef.current !== city
+          ) {
+            socketRef.current.emit(WebSocketEvent.LEAVE_CITY_ROOM, {
+              city: currentCityRoomRef.current,
+            });
+          }
+
+          // Join new city room
+          socketRef.current.emit(WebSocketEvent.JOIN_CITY_ROOM, {
+            city,
+          });
+
+          socketRef.current.once("joined_city_room", (data: { city: City }) => {
+            console.log(`✅ Auto-joined city room: ${data.city}`);
+            currentCityRoomRef.current = city;
+          });
+        }
+      } catch (error) {
+        console.error("Failed to join city room:", error);
+      }
+    };
+
+    joinDeliveryPartnerCityRoom();
+
+    // Cleanup: leave city room when component unmounts
+    return () => {
+      if (currentCityRoomRef.current && socketRef.current) {
+        socketRef.current.emit(WebSocketEvent.LEAVE_CITY_ROOM, {
+          city: currentCityRoomRef.current,
+        });
+        console.log(`👋 Left city room: ${currentCityRoomRef.current}`);
+        currentCityRoomRef.current = null;
+      }
+    };
+  }, [user?.role, isConnected]);
 
   useEffect(() => {
     const serverUrl =
@@ -177,6 +236,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       console.log(`👋 Left city room: ${data.city}`);
     });
   };
+
   const value = {
     isConnected,
     joinOrderRoom,
