@@ -119,9 +119,59 @@ export default class OrderService {
     return this.mapToOrderResponse(order);
   }
 
-  // ============================================================================
-  // ACCEPT ORDER (Delivery Partner)
-  // ============================================================================
+  async cancelOrderByCustomer(
+    orderId: string,
+    customerId: string,
+  ): Promise<OrderResponse> {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: { include: { user: true } },
+        orderItems: { include: { product: true } },
+      },
+    });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    // Authorization: order must belong to this customer
+    if (order.customerId !== customerId) {
+      throw new Error("You are not authorized to cancel this order");
+    }
+
+    // Business rule: only PENDING orders can be cancelled by customer
+    if (order.status !== OrderStatus.PENDING) {
+      throw new Error("Only pending orders can be cancelled");
+    }
+
+    const cancelledOrder = await prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.CANCELLED,
+          cancelledAt: new Date(),
+        },
+        include: {
+          customer: { include: { user: true } },
+          deliveryPartner: { include: { user: true } },
+          orderItems: { include: { product: true } },
+        },
+      });
+
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId,
+          status: OrderStatus.CANCELLED,
+          notes: "Order cancelled by customer",
+        },
+      });
+
+      return updatedOrder;
+    });
+
+    return this.mapToOrderResponse(cancelledOrder);
+  }
 
   async acceptOrder(
     orderId: string,

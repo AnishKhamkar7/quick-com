@@ -71,7 +71,7 @@ const CartPage = () => {
 
     const payload = {
       deliveryAddress,
-      notes: "Leave at the door",
+      notes: "",
       items: items.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,

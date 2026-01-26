@@ -24,6 +24,13 @@ router.post(
   orderHandler.createOrder,
 );
 
+router.patch(
+  "/:orderId/cancel",
+  authenticate,
+  authorize(UserRole.CUSTOMER),
+  orderHandler.cancelOrder,
+);
+
 router.get(
   "/customer/my-orders",
   authenticate,

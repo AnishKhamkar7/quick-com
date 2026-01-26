@@ -129,13 +129,9 @@ export default class OrderWebSocketService {
       throw new Error("Only pending orders can be cancelled");
     }
 
-    const cancelledOrder = await this.orderService.updateOrderStatus(
+    const cancelledOrder = await this.orderService.cancelOrderByCustomer(
       orderId,
-      order.deliveryPartnerId || "",
-      {
-        status: OrderStatus.CANCELLED,
-        notes: "Cancelled by customer",
-      },
+      customerId,
     );
 
     socket.emitOrderCancelledByCustomer(order.city, orderId);

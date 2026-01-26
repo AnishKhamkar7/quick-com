@@ -162,6 +162,7 @@ export default class OrderHandlerIntegrated {
 
   cancelOrder = async (req: Request, res: Response) => {
     try {
+      console.log("IM HERERE}");
       const { params } = getOrderByIdSchema.parse({ params: req.params });
 
       const userId = req.user!.userId;

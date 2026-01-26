@@ -16,9 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { City } from "@/types/global";
 import { CATEGORY_ICON_MAP } from "../../utils/category-icon";
+import { toast } from "sonner";
 
 type OrderStatus =
   | "PENDING"
@@ -74,6 +75,7 @@ const CategoryIcon = ({ category }: { category: string }) => {
 const MyOrders = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<"all" | OrderStatus>("all");
+  const queryClient = useQueryClient();
 
   const fetchOrders = async () => {
     const response = await api.get(`/orders/customer/my-orders`);
@@ -143,8 +145,21 @@ const MyOrders = () => {
       ? orders
       : orders.filter((order: Order) => order.status === activeFilter);
 
-  console.log("Filtered Orders:", filteredOrders);
+  const cancelOrderApi = async (orderId: string) => {
+    const response = await api.patch(`/orders/${orderId}/cancel`);
+    return response.data;
+  };
 
+  const cancelOrderMutation = useMutation({
+    mutationFn: cancelOrderApi,
+    onSuccess: () => {
+      toast.success("Order cancelled successfully");
+      queryClient.invalidateQueries({ queryKey: ["my-orders"] });
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Failed to cancel order");
+    },
+  });
   const filters: Array<{ label: string; value: "all" | OrderStatus }> = [
     { label: "All Orders", value: "all" },
     { label: "Pending", value: "PENDING" },
@@ -185,7 +200,7 @@ const MyOrders = () => {
   return (
     <div className="container mx-auto p-4 lg:p-6 space-y-6">
       {/* Header */}
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <h2 className="text-2xl font-bold tracking-tight">My Orders</h2>
         <p className="text-muted-foreground">Track and manage your orders</p>
       </div>
@@ -255,7 +270,6 @@ const MyOrders = () => {
                     </div>
                   </div>
                 </CardHeader>
-
                 <CardContent className="space-y-4">
                   {/* Delivery Address */}
                   <div className="flex items-start gap-2 text-sm">
@@ -394,13 +408,14 @@ const MyOrders = () => {
                         variant="destructive"
                         size="sm"
                         className="flex-1"
+                        disabled={cancelOrderMutation.isPending}
+                        onClick={() => cancelOrderMutation.mutate(order.id)}
                       >
-                        Cancel Order
+                        {cancelOrderMutation.isPending
+                          ? "Cancelling..."
+                          : "Cancel Order"}
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Track Order
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
