@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
 import DashboardLayout from "@/layout/DashboardLayout";
 import DeliveryPartnerDashboard from "@/pages/delivery/DeliveryDashboard";
@@ -33,6 +38,7 @@ function App() {
             <WebSocketProvider>
               <CartProvider>
                 <Routes>
+                  <Route path="/" element={<Navigate to="/login" replace />} />
                   <Route element={<AuthLayout />}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
