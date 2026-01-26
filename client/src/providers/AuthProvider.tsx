@@ -12,6 +12,7 @@ export interface User {
   customer: {
     id: string;
     address: string | null;
+    city: City;
   } | null;
   deliveryPartner: {
     status: string;

@@ -71,19 +71,12 @@ const formatTime = (dateString: string) => {
   });
 };
 
-const calculateDistance = (address: string): string => {
-  // TODO: Implement actual distance calculation
-  // This is a placeholder - you'll need to use Google Maps API or similar
-  return "2.5 km";
-};
-
 export function AvailableOrderCard({
   order,
   onAccept,
   isAccepting = false,
 }: AvailableOrderCardProps) {
   const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-  const distance = calculateDistance(order.deliveryAddress);
 
   const openMaps = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -122,9 +115,6 @@ export function AvailableOrderCard({
           <div className="flex-1 min-w-0">
             <p className="text-sm text-muted-foreground line-clamp-2">
               {order.deliveryAddress}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {order.city} • {distance} away
             </p>
           </div>
           <Button
