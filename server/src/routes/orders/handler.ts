@@ -89,10 +89,6 @@ export default class OrderHandlerIntegrated {
         throw new Error("Delivery partner not found");
       }
 
-      if (deliveryPartner.status !== "AVAILABLE") {
-        throw new Error("Delivery partner is not available");
-      }
-
       if (deliveryPartner.city !== existingOrder.city) {
         throw new Error(
           "Delivery partner is not in the same city as the order",
