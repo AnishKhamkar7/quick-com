@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
 import DashboardLayout from "@/layout/DashboardLayout";
-import AdminDashboard from "@/pages/dashboard/AdminDashboard";
 import DeliveryPartnerDashboard from "@/pages/delivery/DeliveryDashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -22,6 +21,7 @@ import AvailableOrdersPage from "./pages/delivery/AvailableOrder";
 import DeliveryProfile from "./pages/delivery/DeliveryProfile";
 import RequireAuth from "./providers/RequireAuthProvider";
 import RequireRole from "./providers/RequireRoleProvider";
+import DeliveryHistory from "./pages/delivery/HistoryOrders";
 
 function App() {
   return (
@@ -39,12 +39,6 @@ function App() {
                   </Route>
                   <Route element={<RequireAuth />}>
                     <Route element={<DashboardLayout />}>
-                      <Route element={<RequireRole allowedRoles={["ADMIN"]} />}>
-                        <Route
-                          path="/admin/dashboard"
-                          element={<AdminDashboard />}
-                        />
-                      </Route>
                       <Route
                         element={<RequireRole allowedRoles={["CUSTOMER"]} />}
                       >
@@ -76,6 +70,10 @@ function App() {
                         <Route
                           path="/delivery/profile"
                           element={<DeliveryProfile />}
+                        />
+                        <Route
+                          path="/delivery/history"
+                          element={<DeliveryHistory />}
                         />
                       </Route>
                     </Route>

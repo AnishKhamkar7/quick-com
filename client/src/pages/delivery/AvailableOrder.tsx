@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Truck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -66,27 +66,29 @@ const acceptOrder = async (orderId: string) => {
 
 const OrderCardSkeleton = () => (
   <Card>
-    <div className="p-4 space-y-3">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2 flex-1">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-4 w-24" />
+    <CardContent className="pt-6">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-6 w-16" />
         </div>
-        <Skeleton className="h-6 w-16" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-6 w-20" />
+        </div>
+        <div className="flex items-center justify-between pt-3 border-t">
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-9 w-28" />
+        </div>
       </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-      </div>
-      <div className="flex gap-2">
-        <Skeleton className="h-6 w-20" />
-        <Skeleton className="h-6 w-20" />
-      </div>
-      <div className="flex items-center justify-between pt-3 border-t">
-        <Skeleton className="h-6 w-20" />
-        <Skeleton className="h-9 w-28" />
-      </div>
-    </div>
+    </CardContent>
   </Card>
 );
 
@@ -159,7 +161,7 @@ export default function AvailableOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Available Orders</h2>
+          <CardTitle className="text-2xl">Available Orders</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
             {city && `${city} • `}
             {data?.meta.total || 0} order{data?.meta.total !== 1 ? "s" : ""}{" "}
@@ -198,17 +200,21 @@ export default function AvailableOrdersPage() {
         </div>
       ) : !data?.data || data.data.length === 0 ? (
         /* Empty State */
-        <Card className="text-center py-12">
-          <CardContent className="space-y-4">
-            <Truck className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h2 className="text-xl font-semibold">No Orders Available</h2>
-            <p className="text-muted-foreground">
-              There are no pending orders in your area right now.
-            </p>
-            <Button onClick={handleRefresh} variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Now
-            </Button>
+        <Card>
+          <CardContent className="text-center py-12">
+            <div className="space-y-4">
+              <Truck className="mx-auto h-12 w-12 text-muted-foreground" />
+              <div>
+                <h2 className="text-xl font-semibold">No Orders Available</h2>
+                <p className="text-muted-foreground mt-2">
+                  There are no pending orders in your area right now.
+                </p>
+              </div>
+              <Button onClick={handleRefresh} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Now
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -230,58 +236,62 @@ export default function AvailableOrdersPage() {
 
           {/* Pagination */}
           {data.meta.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1 || isFetching}
-              >
-                Previous
-              </Button>
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1 || isFetching}
+                  >
+                    Previous
+                  </Button>
 
-              <div className="flex items-center gap-2">
-                {Array.from(
-                  { length: Math.min(5, data.meta.totalPages) },
-                  (_, i) => {
-                    let pageNum;
-                    if (data.meta.totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (page <= 3) {
-                      pageNum = i + 1;
-                    } else if (page >= data.meta.totalPages - 2) {
-                      pageNum = data.meta.totalPages - 4 + i;
-                    } else {
-                      pageNum = page - 2 + i;
+                  <div className="flex items-center gap-2">
+                    {Array.from(
+                      { length: Math.min(5, data.meta.totalPages) },
+                      (_, i) => {
+                        let pageNum;
+                        if (data.meta.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (page <= 3) {
+                          pageNum = i + 1;
+                        } else if (page >= data.meta.totalPages - 2) {
+                          pageNum = data.meta.totalPages - 4 + i;
+                        } else {
+                          pageNum = page - 2 + i;
+                        }
+
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={page === pageNum ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setPage(pageNum)}
+                            disabled={isFetching}
+                            className="w-9 h-9 p-0"
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      },
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setPage((p) => Math.min(data.meta.totalPages, p + 1))
                     }
-
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={page === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setPage(pageNum)}
-                        disabled={isFetching}
-                        className="w-9 h-9 p-0"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  },
-                )}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setPage((p) => Math.min(data.meta.totalPages, p + 1))
-                }
-                disabled={page === data.meta.totalPages || isFetching}
-              >
-                Next
-              </Button>
-            </div>
+                    disabled={page === data.meta.totalPages || isFetching}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </>
       )}

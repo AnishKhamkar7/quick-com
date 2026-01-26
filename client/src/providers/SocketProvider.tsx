@@ -10,6 +10,7 @@ import {
 } from "../types/global";
 import { env } from "@/env";
 import { useAuth } from "@/context/auth-context";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface WebSocketProviderProps {
   children: React.ReactNode;
@@ -23,48 +24,64 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const reconnectTimeoutRef = useRef<number | undefined>(undefined);
   const hasShownConnectedToast = useRef(false);
   const currentCityRoomRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const setupGlobalListeners = (socket: Socket) => {
     socket.on(
       WebSocketEvent.ORDER_ACCEPTED,
       (data: WebSocketStatusUpdatePayload) => {
-        toast.success("🎉 Order Accepted!", {
+        toast.success(" Order Accepted!", {
           description: `Your order has been accepted by ${data.deliveryPartner?.name || "delivery partner"}`,
           duration: 5000,
         });
       },
     );
+    socket.on(WebSocketEvent.ORDER_CANCELLED_BY_CUSTOMER, ({ orderId }) => {
+      toast.info(" Order Cancelled", {
+        description: `Order ${orderId} was cancelled by the customer`,
+        duration: 4000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
+    });
 
     socket.on(WebSocketEvent.ORDER_PICKED_UP, () => {
-      toast.info("📦 Order Picked Up", {
+      toast.info(" Order Picked Up", {
         description:
           "Your order has been picked up and is being prepared for delivery",
         duration: 5000,
       });
+      queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
     });
 
     socket.on(
       WebSocketEvent.ORDER_ON_THE_WAY,
       (data: WebSocketStatusUpdatePayload) => {
-        toast.info("🚚 Order On The Way!", {
+        toast.info(" Order On The Way!", {
           description: `Your delivery partner - ${data.deliveryPartner?.name || "Delivery Partner"} is on the way with your order`,
           duration: 5000,
         });
+
+        queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
+        queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
       },
     );
 
     socket.on(WebSocketEvent.ORDER_DELIVERED, () => {
-      toast.success("✅ Order Delivered!", {
+      toast.success(" Order Delivered!", {
         description: "Your order has been delivered. Enjoy!",
         duration: 5000,
       });
+      queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
     });
 
     socket.on(
       WebSocketEvent.ORDER_CANCELLED,
       (data: WebSocketStatusUpdatePayload) => {
-        toast.error("❌ Order Cancelled", {
+        toast.error(" Order Cancelled", {
           description: data.notes || "Your order has been cancelled",
           duration: 5000,
         });
@@ -72,10 +89,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     );
 
     socket.on(WebSocketEvent.NEW_ORDER, (data: WebSocketOrderPayload) => {
-      toast.info("🆕 New Order Available", {
+      toast.info(" New Order Available", {
         description: `Order #${data.orderNumber} - ₹${data.totalAmount}`,
         duration: 5000,
       });
+
+      queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
+      queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
     });
 
     socket.on(WebSocketEvent.ERROR, (error: { message: string }) => {
@@ -86,7 +106,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     });
   };
 
-  // Auto join city room for delivery partners
   useEffect(() => {
     const joinDeliveryPartnerCityRoom = async () => {
       const city = user?.deliveryPartner?.city;

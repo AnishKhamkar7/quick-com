@@ -35,7 +35,7 @@ export const getRoleBasedLinks = (role: string | undefined) => {
           label: "Available Orders",
           icon: ShoppingCart,
         },
-        { to: "/delivery/my-deliveries", label: "My Deliveries", icon: MapPin },
+        { to: "/delivery/history", label: "My Deliveries", icon: MapPin },
         { to: "/delivery/profile", label: "Profile", icon: User },
       ];
     case "CUSTOMER":

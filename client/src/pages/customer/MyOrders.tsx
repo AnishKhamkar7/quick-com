@@ -398,11 +398,6 @@ const MyOrders = () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
-                    {order.status === "DELIVERED" && (
-                      <Button variant="outline" size="sm" className="flex-1">
-                        Reorder
-                      </Button>
-                    )}
                     {order.status === "PENDING" && (
                       <Button
                         variant="destructive"

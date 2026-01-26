@@ -72,5 +72,11 @@ router.get(
   authorize(UserRole.DELIVERY_PARTNER),
   orderHandler.getDeliveryPartnerActiveOrder,
 );
+router.get(
+  "/delivery-partner/history",
+  authenticate,
+  authorize(UserRole.DELIVERY_PARTNER),
+  orderHandler.getDeliveryPartnerDeliveredHistoryOrders,
+);
 
 export default router;

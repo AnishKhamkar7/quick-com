@@ -76,7 +76,7 @@ model DeliveryPartner {
   id           String                @id @default(cuid())
   userId       String                @unique
   vehicleType  String?               
-  status       DeliveryPartnerStatus @default(OFFLINE)
+  status       DeliveryPartnerStatus @default(AVAILABLE)
   city          City
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
