@@ -1,13 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  Menu,
-  LogOut,
-  User,
-  Search,
-  ShoppingCart,
-  Moon,
-  Sun,
-} from "lucide-react";
+import { Menu, LogOut, Search, ShoppingCart, Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -123,14 +115,14 @@ export function Header({ user, onLogout, links }: HeaderProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem asChild>
+            {/* <DropdownMenuItem asChild>
               <Link to={`/${user?.role?.toLowerCase()}/profile`}>
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={onLogout} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
