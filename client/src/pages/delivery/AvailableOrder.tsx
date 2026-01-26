@@ -94,8 +94,9 @@ const OrderCardSkeleton = () => (
 
 export default function AvailableOrdersPage() {
   const queryClient = useQueryClient();
-  const { isConnected } = useWebSocket();
+  const { isConnected, joinOrderRoom } = useWebSocket();
   const { user } = useAuth();
+
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
 
@@ -125,9 +126,12 @@ export default function AvailableOrdersPage() {
 
   const acceptMutation = useMutation({
     mutationFn: acceptOrder,
-    onSuccess: () => {
+    onSuccess: (res) => {
+      console.log("HEHEHEHHE", res);
       queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
       queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
+
+      joinOrderRoom(res.id);
 
       toast.success("Order Accepted! 🎉", {
         description: "The order has been assigned to you. Start delivering!",

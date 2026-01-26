@@ -11,6 +11,7 @@ import api from "@/lib/axios";
 import UpdateAddressCard from "@/components/UpdateAdress";
 import { useAuth } from "@/context/auth-context";
 import { useState } from "react";
+import { useWebSocket } from "@/context/socket-context";
 
 type Payload = {
   deliveryAddress: string | null | undefined;
@@ -21,7 +22,7 @@ type Payload = {
 const CartPage = () => {
   const { state, dispatch } = useCart();
   const { user } = useAuth();
-  console.log("User in cart page:", user);
+  const { joinOrderRoom } = useWebSocket();
   const [deliveryAddress, setDeliveryAddress] = useState<
     string | null | undefined
   >(user?.customer?.address === null ? null : user?.customer?.address);
@@ -80,7 +81,8 @@ const CartPage = () => {
 
     createOrderMutation.mutate(payload, {
       onSuccess: (res) => {
-        console.log("Order created:", res);
+        joinOrderRoom(res.data.id);
+
         toast.success("Order placed successfully 🎉");
 
         dispatch({ type: "CLEAR" });
