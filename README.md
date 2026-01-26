@@ -1,8 +1,8 @@
-# QuickCom – Local Quick Commerce Platform
+# ⚡ QuickCom – Local Quick Commerce Platform
 
-QuickCom is a **full‑stack quick commerce application** built with **React + Vite (TypeScript)** on the client, **Node.js** on the server, and **PostgreSQL** as the database. The database runs locally using **Docker**, while the client and server run normally using npm.
+QuickCom is a **full-stack quick commerce application** built with **React + Vite (TypeScript)** on the frontend, **Node.js + Express** on the backend, and **PostgreSQL** as the database.
 
-This README explains **how to run the project locally**, set up the database, and understand the project structure.
+The database runs locally using **Docker**, while the client and server run normally using **npm**. The application also uses **WebSockets (Socket.IO)** for real-time order and delivery updates.
 
 ---
 
@@ -14,6 +14,7 @@ This README explains **how to run the project locally**, set up the database, an
 - Vite
 - shadcn/ui + Tailwind CSS
 - React Router
+- TanStack Query
 
 ### Backend
 
@@ -21,10 +22,12 @@ This README explains **how to run the project locally**, set up the database, an
 - Express
 - Prisma ORM
 - PostgreSQL
+- Socket.IO (WebSockets)
 
 ### Infrastructure
 
-- Docker (Postgres only)
+- Docker (PostgreSQL only)
+- Nginx (for production deployment)
 
 ---
 
@@ -63,8 +66,6 @@ docker compose version
 
 ## 🐘 Database Setup (PostgreSQL with Docker)
 
-The project uses **PostgreSQL running inside Docker**.
-
 ### 1️⃣ Start the database
 
 From the project root:
@@ -84,23 +85,15 @@ Verify:
 docker ps
 ```
 
-You should see a container named something like:
-
-```
-delivery_db
-```
-
 ---
 
 ### 2️⃣ Environment Variables
 
-Create a `.env` file in the **server directory** (or project root depending on setup):
+Create a `.env` file in the **server directory** (or project root if shared):
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/delivery_db"
 ```
-
-> Update username/password/db name if your docker config differs.
 
 ---
 
@@ -112,31 +105,10 @@ From the **server** directory:
 npx prisma migrate dev
 ```
 
-This will:
-
-- Create all tables
-- Apply enums and indexes
-- Sync Prisma schema with Postgres
-
 (Optional) Open Prisma Studio:
 
 ```bash
 npx prisma studio
-```
-
----
-
-### 4️⃣ Access Database via CLI (Optional)
-
-```bash
-docker exec -it delivery_db psql -U postgres
-```
-
-Inside psql:
-
-```sql
-\dt
-SELECT * FROM "User";
 ```
 
 ---
@@ -150,11 +122,13 @@ npm install
 npm run dev
 ```
 
-Server will start on (example):
+Backend runs on:
 
 ```
 http://localhost:3000
 ```
+
+WebSocket server runs on the **same backend instance**.
 
 ---
 
@@ -167,7 +141,7 @@ npm install
 npm run dev
 ```
 
-Client will start on:
+Frontend runs on:
 
 ```
 http://localhost:5173
@@ -175,36 +149,62 @@ http://localhost:5173
 
 ---
 
+## 🔐 Demo Login Credentials
+
+Use the following credentials to test the application:
+
+### 👤 Customer
+
+```
+Email:    customer@gmail.com
+Password: customer
+```
+
+### 🚴 Delivery Partner
+
+```
+Email:    delivery@gmail.com
+Password: delivery
+```
+
+> ⚠️ **Admin role exists in backend but Admin UI is not implemented yet.**
+
+---
+
 ## 👥 User Roles
 
-QuickCom supports multiple roles:
+- **Customer** – Browse products, place orders, track status
+- **Delivery Partner** – Accept and deliver orders
+- **Admin** – Backend role only (UI pending)
 
-- **Customer** – Browse products, place orders
-- **Delivery Partner** – Accept & deliver orders
-- **Admin** – Manage platform data
+---
 
-Role handling is managed via Prisma enums and backend guards.
+## 🔌 Real-Time Features (WebSockets)
+
+- Live order status updates
+- Delivery status tracking
+- Customer ↔ Delivery Partner notifications
+- City-based event rooms
 
 ---
 
 ## 📦 Core Features
 
-- Customer product browsing & cart
-- Order placement & tracking
+- Product browsing & cart
+- Order placement & cancellation
+- Real-time order tracking
 - Delivery partner dashboard
-- Active delivery handling
-- City‑based order assignment
-- Order status history
+- Role-based access control
 
 ---
 
 ## 🛠 Common Commands
 
 ```bash
-# Start DB
+# Start database
 docker compose up -d
 
-# Stop DB
+# Stop database
 docker compose down
 
 # Backend
@@ -220,21 +220,13 @@ npx prisma studio
 
 ---
 
-## 🚀 Notes
-
-- Database runs **only in Docker**
-- Client & server run **normally using npm**
-- Tables use **PascalCase** (Prisma default)
-- Enum values are **UPPERCASE**
-
----
-
 ## 🧠 Future Improvements
 
-- Redis for live order updates
-- WebSocket‑based delivery tracking
-- Admin analytics dashboard
-- Real map integration
+- Admin dashboard UI
+- Redis for WebSocket scaling
+- Live map tracking
+- Analytics dashboard
+- Payment integration
 
 ---
 
