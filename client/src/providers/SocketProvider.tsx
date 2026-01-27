@@ -25,7 +25,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const hasShownConnectedToast = useRef(false);
   const currentCityRoomRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isFetching, isLoading } = useAuth();
+  const isAuthReady = !isFetching && !isLoading && !!user;
 
   const setupGlobalListeners = (socket: Socket) => {
     socket.on(
@@ -158,6 +159,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   }, [user?.role, isConnected]);
 
   useEffect(() => {
+    if (!isAuthReady) return;
+
     const serverUrl =
       env.MODE === "development" && env.VITE_API_BASE_URL
         ? env.VITE_API_BASE_URL.replace("/api", "")
@@ -206,7 +209,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       newSocket.disconnect();
       socketRef.current = null;
     };
-  }, []);
+  }, [isAuthReady]);
 
   const joinOrderRoom = (orderId: string) => {
     const socket = socketRef.current;

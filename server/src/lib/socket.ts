@@ -36,10 +36,8 @@ export default class WebSocketService {
   }
 
   private setupMiddleware() {
-    // Authentication middleware
     this.io.use(async (socket: Socket, next) => {
       try {
-        // Extract token from handshake auth or query
         const token =
           socket.handshake.auth.token ||
           socket.handshake.query.token ||
@@ -52,15 +50,12 @@ export default class WebSocketService {
           return next(new Error("Authentication token required"));
         }
 
-        // Verify token and get user data
-        // You should implement your own JWT verification logic here
         const userData = await this.verifyToken(token as string);
 
         if (!userData) {
           return next(new Error("Invalid authentication token"));
         }
 
-        // Attach user data to socket
         socket.data = {
           userId: userData.userId,
           userRole: userData.userRole,
@@ -75,10 +70,6 @@ export default class WebSocketService {
     });
   }
 
-  // ============================================================================
-  // CONNECTION HANDLER
-  // ============================================================================
-
   private setupConnectionHandler() {
     this.io.on("connection", (socket: Socket) => {
       const socketData = socket.data as SocketData;
@@ -86,18 +77,15 @@ export default class WebSocketService {
         `User connected: ${socketData.userId} (${socketData.userRole})`,
       );
 
-      // Store socket reference
       const sockets =
         this.connectedUsers.get(socketData.userId) ?? new Set<Socket>();
 
       sockets.add(socket);
       this.connectedUsers.set(socketData.userId, sockets);
 
-      // Setup event handlers
       this.setupCityRoomHandlers(socket);
       this.setupOrderRoomHandlers(socket);
 
-      // Handle disconnection
       socket.on("disconnect", () => {
         console.log(`User disconnected: ${socketData.userId}`);
         const sockets = this.connectedUsers.get(socketData.userId);
@@ -112,14 +100,9 @@ export default class WebSocketService {
     });
   }
 
-  // ============================================================================
-  // CITY ROOM HANDLERS (For delivery partners to receive new orders)
-  // ============================================================================
-
   private setupCityRoomHandlers(socket: Socket) {
     const socketData = socket.data as SocketData;
 
-    // Join city room (for delivery partners)
     socket.on(WebSocketEvent.JOIN_CITY_ROOM, (data) => {
       try {
         const { city } = wsJoinCityRoomSchema.parse(data);
@@ -146,7 +129,6 @@ export default class WebSocketService {
       }
     });
 
-    // Leave city room
     socket.on(WebSocketEvent.LEAVE_CITY_ROOM, (data) => {
       try {
         const { city } = wsJoinCityRoomSchema.parse(data);
@@ -166,14 +148,9 @@ export default class WebSocketService {
     });
   }
 
-  // ============================================================================
-  // ORDER ROOM HANDLERS (For customer and delivery partner communication)
-  // ============================================================================
-
   private setupOrderRoomHandlers(socket: Socket) {
     const socketData = socket.data as SocketData;
 
-    // Join order room
     socket.on(WebSocketEvent.JOIN_ORDER_ROOM, (data) => {
       try {
         const { orderId } = wsJoinOrderRoomSchema.parse(data);
@@ -194,7 +171,6 @@ export default class WebSocketService {
       }
     });
 
-    // Leave order room
     socket.on(WebSocketEvent.LEAVE_ORDER_ROOM, (data) => {
       try {
         const { orderId } = wsJoinOrderRoomSchema.parse(data);
@@ -213,10 +189,6 @@ export default class WebSocketService {
       }
     });
   }
-
-  // ============================================================================
-  // PUBLIC METHODS TO EMIT EVENTS
-  // ============================================================================
 
   emitNewOrderToCity(city: City, orderPayload: WebSocketOrderPayload) {
     const roomName = this.getCityRoomName(city);
@@ -294,10 +266,6 @@ export default class WebSocketService {
 
     console.log(`Event ${event} sent to user ${userId}`);
   }
-
-  // ============================================================================
-  // HELPER METHODS
-  // ============================================================================
 
   private getCityRoomName(city: City): string {
     return `city:${city}`;

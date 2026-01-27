@@ -62,8 +62,8 @@ export default function Login() {
     onSuccess: async () => {
       await checkAuth();
     },
-    onError: (err) => {
-      setError(err instanceof Error ? err.message : "Login failed");
+    onError: () => {
+      setError("Invalid Credentials");
     },
   });
 
