@@ -86,6 +86,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
           description: data.notes || "Your order has been cancelled",
           duration: 5000,
         });
+        queryClient.invalidateQueries({ queryKey: ["activeDelivery"] });
+        queryClient.invalidateQueries({ queryKey: ["availableOrders"] });
       },
     );
 
